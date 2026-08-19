@@ -2,6 +2,7 @@ import java.util.Scanner;
 
 public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
+    private static final int MAX_TASKS = 100;
 
     public static void main(String[] args) {
         String banner = "██████╗ █████╗ ███████╗███████╗ █████╗ ██████╗\n"
@@ -10,6 +11,9 @@ public class Caesar {
                 + "██║     ██╔══██║██╔══╝  ╚════██║██╔══██║██╔══██╗\n"
                 + "╚██████╗██║  ██║███████╗███████║██║  ██║██║  ██║\n"
                 + " ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
+        String[] tasks = new String[MAX_TASKS];
+        int taskCount = 0;
+
         System.out.print(DIVIDER + "\n" + "\n");
         System.out.println(banner);
         System.out.println("Hello! I'm Caesar.\nWhat can I do for you?");
@@ -26,6 +30,17 @@ public class Caesar {
                     System.out.println("Bye. Hope to see you again soon!");
                     System.out.println(DIVIDER);
                     break;
+                } else if ("list".equals(command)) {
+                    System.out.println("Bae, here are the tasks in your list:\n");
+                    for (int i = 0; i < taskCount; i++) {
+                        System.out.println((i + 1) + ". " + tasks[i]);
+                    }
+                    System.out.println(DIVIDER);
+                } else {
+                    tasks[taskCount] = command;
+                    taskCount++;
+                    System.out.println("added: " + command);
+                    System.out.println(DIVIDER);
                 }
             }
         }

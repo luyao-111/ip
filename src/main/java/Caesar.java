@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
@@ -14,7 +16,7 @@ public class Caesar {
                 + "██║     ██╔══██║██╔══╝  ╚════██║██╔══██║██╔══██╗\n"
                 + "╚██████╗██║  ██║███████╗███████║██║  ██║██║  ██║\n"
                 + " ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
-        Task[] tasks = new Task[MAX_TASKS];
+        ArrayList<Task> tasks = new ArrayList<>(MAX_TASKS);
         int taskCount = 0;
         int taskDone = 0;
 
@@ -39,7 +41,17 @@ public class Caesar {
                         System.out.println(DIVIDER);
                         break;
                     } else if ("list".equals(prefix)) {
-                        printTaskList(tasks, taskCount);
+                        if ("sorted".equals(details)) {
+                            ArrayList<Task> tasksSorted = new ArrayList<>(tasks);
+                            tasksSorted.sort(Comparator.comparing(Task::isDone));
+                            printTaskList(tasksSorted, taskCount, taskDone);
+                            continue;
+                        }
+                        printTaskList(tasks, taskCount, taskDone);
+                    } else if ("delete".equals(prefix)) {
+                        int[] counts = deleteTask(tasks, taskCount, taskDone, details);
+                        taskCount = counts[0];
+                        taskDone = counts[1];
                     } else if ("mark".equals(prefix) || "unmark".equals(prefix)) {
                         updateTaskStatus(tasks, taskCount, taskDone, prefix, details);
                     } else if ("todo".equals(prefix)) {
@@ -63,12 +75,12 @@ public class Caesar {
         }
     }
 
-    private static int addTask(Task[] tasks, int taskCount, Task task) throws CaesarException {
-        if (taskCount == tasks.length) {
+    private static int addTask(ArrayList<Task> tasks, int taskCount, Task task) throws CaesarException {
+        if (taskCount == MAX_TASKS) {
             throw new CaesarException("You have too many tasks undone. Please finish some first before adding more");
         }
 
-        tasks[taskCount] = task;
+        tasks.add(task);
         taskCount++;
         System.out.println("Got it. I've added this task:\n" + task
                 + "\nNow you have " + taskCount + " tasks in the list.");
@@ -76,19 +88,52 @@ public class Caesar {
         return taskCount;
     }
 
-    private static void printTaskList(Task[] tasks, int taskCount) throws CaesarException {
+    private static int[] deleteTask(ArrayList<Task> tasks, int taskCount, int taskDone, String details) throws CaesarException {
+        if (details == null || details.trim().isEmpty()) {
+            throw new CaesarException("May I know more details? Try enter in this format: "
+                    + "delete <task number>");
+        }
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(details.trim());
+        } catch (NumberFormatException exception) {
+            throw new CaesarException("Please provide a valid task number.");
+        }
+
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            throw new CaesarException("That task number does not exist.");
+        }
+
+        taskCount--;
+        if (tasks.get(taskNumber - 1).toString().startsWith("[X]")) {
+            taskDone--;
+        }
+        Task removedTask = tasks.remove(taskNumber - 1);
+        System.out.println("Noted. I've removed this task:\n" + removedTask
+                + "\nNow you have " + taskCount + " tasks in the list.");
+        System.out.println(DIVIDER);
+        return new int[]{taskCount, taskDone};
+    }
+
+    private static void printTaskList(ArrayList<Task> tasks, int taskCount, int taskDone) throws CaesarException {
         if (taskCount == 0) {
             throw new CaesarException("Congrats! You have no todos now! Enjoy the day!");
         }
 
         System.out.println("Here are the tasks in your list:\n");
         for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i]);
+            System.out.println((i + 1) + "." + tasks.get(i));
         }
+
+        if (taskDone == taskCount) {
+            System.out.println("\nCongrats! You have completed all your tasks!");
+        }
+
         System.out.println(DIVIDER);
     }
 
-    private static void updateTaskStatus(Task[] tasks, int taskCount, int taskDone,
+    private static void updateTaskStatus(ArrayList<Task> tasks, int taskCount, int taskDone,
                                          String action, String details) throws CaesarException {
         if (details == null || details.trim().isEmpty()) {
             throw new CaesarException("May I know more details? Try enter in this format: "
@@ -106,7 +151,7 @@ public class Caesar {
             throw new CaesarException("That task number does not exist.");
         }
 
-        Task task = tasks[taskNumber - 1];
+        Task task = tasks.get(taskNumber - 1);
         if ("mark".equals(action)) {
             task.markAsDone();
             taskDone++;

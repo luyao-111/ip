@@ -6,11 +6,17 @@ public class Task {
         this.description = description;
     }
 
-    public void markAsDone() {
+    public void markAsDone() throws CaesarException {
+        if (done) {
+            throw new CaesarException("You have marked this task!");
+        }
         done = true;
     }
 
-    public void markAsNotDone() {
+    public void markAsNotDone() throws CaesarException {
+        if (!done) {
+            throw new CaesarException("You have unmarked this task!");
+        }
         done = false;
     }
 

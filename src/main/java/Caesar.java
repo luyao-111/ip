@@ -44,8 +44,8 @@ public class Caesar {
 
         System.out.print(DIVIDER + "\n" + "\n");
         System.out.println(banner);
-        System.out.println("Hello! I'm Caesar.\nWhat can I do for you?");
-        System.out.println("You can enter the following commands: " + COMMANDS);
+        System.out.println("Hello! I'm Caesar.\nYou look even brighter than the last time we spoke.\nHow may I ease your day today?");
+        System.out.println("\nYou can enter the following commands: " + COMMANDS);
         System.out.println(DIVIDER);
 
         try (Scanner scanner = new Scanner(System.in)) {
@@ -82,7 +82,7 @@ public class Caesar {
                             if (details != null) {
                                 throw unknownCommand();
                             }
-                            System.out.println("Bye. Hope to see you again soon!");
+                            System.out.println("You handled today wonderfully. \nUntil next time—I'm always in your corner.");
                             System.out.println(DIVIDER);
                             return;
                         }
@@ -102,26 +102,40 @@ public class Caesar {
         }
 
         tasks.add(task);
-        System.out.println("Got it. I've added this task:\n" + task
-                + "\nNow you have " + tasks.size() + " tasks in the list.");
+        System.out.println("Got it. I've safely recorded this for you:\n" + task);
+        DynamicComment(tasks);
+    }
+
+    private static void DynamicComment(ArrayList<Task> tasks) {
+        if (tasks.size() < 3) {
+            System.out.println("Now you have " + tasks.size() + " tasks in the list.\n" 
+            + "Here is what we have lined up: \n" + tasks +" \nA light and manageable day ahead—you've got this effortlessly."
+            );
+        } else if (tasks.size() < 7) {
+            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.n"
+            + "Here is your schedule for today: \n" + tasks + "\nSteady pace, one thing at a time—I'm right beside you:");
+        } else {
+            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.n"
+            + "You have a full plate today: \n" + tasks + "\nRemember to take breaks and stay hydrated—let's tackle them together step by step!");
+        }
         System.out.println(DIVIDER);
     }
 
     private static void deleteTask(ArrayList<Task> tasks, String details) throws CaesarException {
         int taskNumber = parseTaskNumber(details, "delete <task number>");
         if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new CaesarException("That task number does not exist.");
+            throw new CaesarException("I couldn't locate that specific item number on our list. Take a quick look at /list/ to check the numbering.");
         }
 
         Task removedTask = tasks.remove(taskNumber - 1);
         System.out.println("Noted. I've removed this task:\n" + removedTask
-                + "\nNow you have " + tasks.size() + " tasks in the list.");
+                + "\nNow you have " + tasks.size() + " tasks in the list.\nI'm glad that you got some of your own time");
         System.out.println(DIVIDER);
     }
 
     private static void printTaskList(ArrayList<Task> tasks) throws CaesarException {
         if (tasks.isEmpty()) {
-            throw new CaesarException("Congrats! You have no todos now! Enjoy the day!");
+            throw new CaesarException("Your schedule is completely clear right now. Take this time to relax and recharge");
         }
 
         System.out.println("Here are the tasks in your list:\n");
@@ -146,16 +160,16 @@ public class Caesar {
                                          String details) throws CaesarException {
         int taskNumber = parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
         if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new CaesarException("That task number does not exist.");
+            throw new CaesarException("I couldn't locate that specific item number on our list. Take a quick look at /list/ to check the numbering.");
         }
 
         Task task = tasks.get(taskNumber - 1);
         if (action == CommandType.MARK) {
             task.markAsDone();
-            System.out.println("Nice! I've marked this task as done:\n" + task);
+            System.out.println("Well done, proud of your progress. I've marked this as complete:\n" + task);
         } else {
             task.markAsNotDone();
-            System.out.println("OK, I've marked this task as not done yet:\n" + task);
+            System.out.println("No worries at all, no need to rush. I've set this back to pending:\n" + task);
         }
         System.out.println(DIVIDER);
     }
@@ -214,11 +228,11 @@ public class Caesar {
     }
 
     private static CaesarException missingDetails(String format) {
-        return new CaesarException("May I know more details? Try enter in this format: " + format);
+        return new CaesarException("I'd love to organize that for you, but I just need more details. Try enter in this format: " + format);
     }
 
     private static CaesarException unknownCommand() {
-        return new CaesarException("I'm sorry, I'm afraid that I can't help you with this. "
+        return new CaesarException("I'm not quite sure I caught that command, but take your time. Let's try again. "
                 + "Try these commands: " + COMMANDS);
     }
 }

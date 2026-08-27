@@ -1,3 +1,6 @@
+/**
+ * A task without a deadline or scheduled time.
+ */
 public class ToDo extends Task {
     public ToDo(String description) {
         super(description);

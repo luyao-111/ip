@@ -1,3 +1,6 @@
+/**
+ * A task that can be completed or left pending.
+ */
 public class Task {
     private final String description;
     private boolean done;
@@ -22,6 +25,13 @@ public class Task {
 
     public boolean isDone() {
         return done;
+    }
+
+    /**
+     * Returns the task text used when saving the task.
+     */
+    public String getDescription() {
+        return description;
     }
 
     @Override

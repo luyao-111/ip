@@ -1,10 +1,22 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+/**
+ * Runs the Caesar command-line task assistant and coordinates task persistence.
+ */
 public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
     private static final int MAX_TASKS = 100;
+    /** Relative path so the application can be moved to another computer or OS. */
+    private static final Path TASK_FILE = Paths.get("data", "tasks.txt");
     private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
             + "event <description> /from <start> /to <end>, list, mark <number>, "
             + "unmark <number>, delete <number>, or bye";
@@ -40,13 +52,20 @@ public class Caesar {
                 + "██║     ██╔══██║██╔══╝  ╚════██║██╔══██║██╔══██╗\n"
                 + "╚██████╗██║  ██║███████╗███████║██║  ██║██║  ██║\n"
                 + " ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝\n";
-        ArrayList<Task> tasks = new ArrayList<>(MAX_TASKS);
 
         System.out.print(DIVIDER + "\n" + "\n");
         System.out.println(banner);
         System.out.println("Hello! I'm Caesar.\nYou look even brighter than the last time we spoke.\nHow may I ease your day today?");
         System.out.println("\nYou can enter the following commands: " + COMMANDS);
         System.out.println(DIVIDER);
+
+        ArrayList<Task> tasks;
+        try {
+            tasks = loadTasksFromFile(TASK_FILE);
+        } catch (CaesarException e) {
+            System.out.println("Error loading tasks from file: " + e.getMessage());
+            tasks = new ArrayList<>(MAX_TASKS);
+        }
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
@@ -96,12 +115,164 @@ public class Caesar {
         }
     }
 
+    /**
+     * Loads all saved tasks from a relative, platform-independent path.
+     * A missing file and its parent directory are created automatically.
+     *
+     * @param filePath path of the task file
+     * @return tasks read from the file
+     * @throws CaesarException if the file cannot be read or contains invalid data
+     */
+    private static ArrayList<Task> loadTasksFromFile(Path filePath) throws CaesarException {
+        ArrayList<Task> tasks = new ArrayList<>(MAX_TASKS);
+        File file = filePath.toFile();
+        try {
+            Path parent = filePath.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("Task file not found. A new task file has been created at: " + filePath);
+            }
+
+            // Scanner reads the saved file line by line.
+            try (Scanner fileScanner = new Scanner(file)) {
+                int lineNumber = 0;
+                while (fileScanner.hasNextLine()) {
+                    String line = fileScanner.nextLine();
+                    lineNumber++;
+                    if (line.isBlank()) {
+                        continue;
+                    }
+                    if (tasks.size() >= MAX_TASKS) {
+                        throw new CaesarException("Task file contains more than " + MAX_TASKS + " tasks.");
+                    }
+                    tasks.add(parseTask(line, lineNumber));
+                }
+            }
+        } catch (FileNotFoundException exception) {
+            throw new CaesarException("Failed to read task file " + filePath + ": " + exception.getMessage());
+        } catch (IOException exception) {
+            throw new CaesarException("Failed to read task file " + filePath + ": " + exception.getMessage());
+        }
+        return tasks;
+    }
+
+    /**
+     * Compatibility wrapper that accepts a string path for callers from earlier levels.
+     */
+    static ArrayList<Task> LoadTasksfromFile(String filePath) throws CaesarException {
+        return loadTasksFromFile(Paths.get(filePath));
+    }
+
+    /**
+     * Saves the complete task list to the task file.
+     */
+    private static void saveTasksToFile(ArrayList<Task> tasks, Path filePath) throws CaesarException {
+        Path parent = filePath.getParent();
+        try {
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            // FileWriter overwrites the file by default; the full task list is saved each time.
+            try (FileWriter writer = new FileWriter(filePath.toFile())) {
+                for (Task task : tasks) {
+                    writer.write(serializeTask(task));
+                    writer.write(System.lineSeparator()); //OS-independent line separator (replace other \n later?)
+                }
+            }
+        } catch (IOException exception) {
+            throw new CaesarException("Failed to save tasks to file " + filePath + ": " + exception.getMessage());
+        }
+    }
+
+    private static String serializeTask(Task task) {
+        String status = task.isDone() ? "1" : "0";
+        if (task instanceof Deadline deadline) {
+            return String.join(" | ", "D", status, task.getDescription(), deadline.getBy());
+        }
+        if (task instanceof Event event) {
+            return String.join(" | ", "E", status, task.getDescription(), event.getStart(), event.getEnd());
+        }
+        return String.join(" | ", "T", status, task.getDescription());
+    }
+
+    private static Task parseTask(String line, int lineNumber) throws CaesarException {
+        String[] parts = line.split("\\|", -1);
+        String type = parts.length > 0 ? parts[0].trim() : "";
+        int expectedParts = switch (type) {
+            case "T" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+            default -> throw invalidTaskLine(lineNumber, "unknown task type " + type);
+        };
+        if (parts.length != expectedParts) {
+            throw invalidTaskLine(lineNumber, "expected " + expectedParts + " fields but found " + parts.length);
+        }
+
+        boolean isDone = parseStatus(parts[1].trim(), lineNumber);
+        String description = requireFileField(parts[2], "description", lineNumber);
+        Task task;
+        if ("T".equals(type)) {
+            task = new ToDo(description);
+        } else if ("D".equals(type)) {
+            task = new Deadline(description, requireFileField(parts[3], "deadline", lineNumber));
+        } else {
+            task = new Event(description,
+                    requireFileField(parts[3], "event start", lineNumber),
+                    requireFileField(parts[4], "event end", lineNumber));
+        }
+
+        if (isDone) {
+            try {
+                task.markAsDone();
+            } catch (CaesarException exception) {
+                throw invalidTaskLine(lineNumber, exception.getMessage());
+            }
+        }
+        return task;
+    }
+
+    private static boolean parseStatus(String status, int lineNumber) throws CaesarException {
+    if ("1".equals(status)) {
+        return true;
+    }
+    if ("0".equals(status)) {
+        return false;
+    }
+    throw invalidTaskLine(lineNumber, "status must be 1 or 0");
+    }
+
+    private static String requireFileField(String value, String fieldName, int lineNumber) throws CaesarException {
+        String trimmedValue = value.trim();
+        if (trimmedValue.isEmpty()) {
+            throw invalidTaskLine(lineNumber, fieldName + " cannot be empty");
+        }
+        return trimmedValue;
+    }
+
+    private static CaesarException invalidTaskLine(int lineNumber, String reason) {
+        return new CaesarException("Invalid task data on line " + lineNumber + ": " + reason);
+    }
+
+    // Compatibility wrapper that accepts a string path for callers from earlier levels.
+    private static void saveTasks(ArrayList<Task> tasks) throws CaesarException {
+        saveTasksToFile(tasks, TASK_FILE);
+    }
+
     private static void addTask(ArrayList<Task> tasks, Task task) throws CaesarException {
-        if (tasks.size() == MAX_TASKS) {
+        if (tasks.size() >= MAX_TASKS) {
             throw new CaesarException("You have too many tasks undone. Please finish some first before adding more");
         }
 
         tasks.add(task);
+        try {
+            saveTasks(tasks);
+        } catch (CaesarException exception) {
+            tasks.remove(tasks.size() - 1);
+            throw exception;
+        }
         System.out.println("Got it. I've safely recorded this for you:\n" + task);
         DynamicComment(tasks);
     }
@@ -112,10 +283,10 @@ public class Caesar {
             + "Here is what we have lined up: \n" + tasks +" \nA light and manageable day ahead—you've got this effortlessly."
             );
         } else if (tasks.size() < 7) {
-            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.n"
+            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.\n"
             + "Here is your schedule for today: \n" + tasks + "\nSteady pace, one thing at a time—I'm right beside you:");
         } else {
-            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.n"
+            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.\n"
             + "You have a full plate today: \n" + tasks + "\nRemember to take breaks and stay hydrated—let's tackle them together step by step!");
         }
         System.out.println(DIVIDER);
@@ -128,6 +299,12 @@ public class Caesar {
         }
 
         Task removedTask = tasks.remove(taskNumber - 1);
+        try {
+            saveTasks(tasks);
+        } catch (CaesarException exception) {
+            tasks.add(taskNumber - 1, removedTask);
+            throw exception;
+        }
         System.out.println("Noted. I've removed this task:\n" + removedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.\nI'm glad that you got some of your own time");
         System.out.println(DIVIDER);
@@ -166,9 +343,21 @@ public class Caesar {
         Task task = tasks.get(taskNumber - 1);
         if (action == CommandType.MARK) {
             task.markAsDone();
+            try {
+                saveTasks(tasks);
+            } catch (CaesarException exception) {
+                task.markAsNotDone();
+                throw exception;
+            }
             System.out.println("Well done, proud of your progress. I've marked this as complete:\n" + task);
         } else {
             task.markAsNotDone();
+            try {
+                saveTasks(tasks);
+            } catch (CaesarException exception) {
+                task.markAsDone();
+                throw exception;
+            }
             System.out.println("No worries at all, no need to rush. I've set this back to pending:\n" + task);
         }
         System.out.println(DIVIDER);

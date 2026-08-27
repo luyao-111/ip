@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Runs the Caesar command-line task assistant and coordinates task persistence.
@@ -17,6 +21,7 @@ public class Caesar {
     private static final int MAX_TASKS = 100;
     /** Relative path so the application can be moved to another computer or OS. */
     private static final Path TASK_FILE = Paths.get("data", "tasks.txt");
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
     private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
             + "event <description> /from <start> /to <end>, list, mark <number>, "
             + "unmark <number>, delete <number>, or bye";
@@ -91,6 +96,7 @@ public class Caesar {
                                 sortedTasks.sort(Comparator.comparing(Task::isDone));
                                 printTaskList(sortedTasks);
                             } else {
+                                //add list by date and time sorting later. maybe also just tasks of a specific date.
                                 printTaskList(tasks);
                             }
                         }
@@ -113,6 +119,32 @@ public class Caesar {
                 }
             }
         }
+    }
+    
+    /**
+     * Converts a date string in the format YYYY-MM-DD to a more readable format.
+     *
+     * @param time the date string to convert
+     * @return the converted date string in the format MMM d yyyy
+     * @throws CaesarException if the input date string is not in the expected format
+     */
+
+    private static String convertTime(String time) throws CaesarException {
+        String trimmed = time.trim();
+        LocalDate date;
+
+        try {
+            // 1. Try standard ISO format: yyyy-MM-dd
+            date = LocalDate.parse(trimmed);
+        } catch (DateTimeParseException e1) {
+            try {
+                // 2. Fallback: try MMM d yyyy to avoid error when reading the file
+                date = LocalDate.parse(trimmed, DISPLAY_FORMAT);
+            } catch (DateTimeParseException e2) {
+                throw new CaesarException("Invalid date format. Please use YYYY-MM-DD or MMM d yyyy.");
+            }
+        }
+        return date.format(DISPLAY_FORMAT);
     }
 
     /**
@@ -371,10 +403,11 @@ public class Caesar {
 
         String description = commandParts[0].trim();
         String by = commandParts[1].trim();
+        String formattedBy = convertTime(by);
         if (description.isEmpty() || by.isEmpty()) {
             throw missingDetails("deadline <description> /by <date or time>");
         }
-        return new Deadline(description, by);
+        return new Deadline(description, formattedBy);
     }
 
     private static Task createEvent(String details) throws CaesarException {
@@ -391,10 +424,12 @@ public class Caesar {
         String description = commandParts[0].trim();
         String start = timeParts[0].trim();
         String end = timeParts[1].trim();
+        String formattedStart = convertTime(start);
+        String formattedEnd = convertTime(end);
         if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
             throw missingDetails("event <description> /from <start> /to <end>");
         }
-        return new Event(description, start, end);
+        return new Event(description, formattedStart, formattedEnd);
     }
 
     private static int parseTaskNumber(String details, String format) throws CaesarException {

@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Locale;
 import java.util.Scanner;
 import java.io.File;
@@ -18,7 +17,6 @@ import java.time.format.DateTimeParseException;
  */
 public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
-    private static final int MAX_TASKS = 100;
     /** Relative path so the application can be moved to another computer or OS. */
     private static final Path TASK_FILE = Paths.get("data", "tasks.txt");
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
@@ -64,12 +62,12 @@ public class Caesar {
         System.out.println("\nYou can enter the following commands: " + COMMANDS);
         System.out.println(DIVIDER);
 
-        ArrayList<Task> tasks;
+        TaskList tasks;
         try {
-            tasks = loadTasksFromFile(TASK_FILE);
+            tasks = new TaskList(loadTasksFromFile(TASK_FILE));
         } catch (CaesarException e) {
             System.out.println("Error loading tasks from file: " + e.getMessage());
-            tasks = new ArrayList<>(MAX_TASKS);
+            tasks = new TaskList();
         }
 
         try (Scanner scanner = new Scanner(System.in)) {
@@ -92,9 +90,7 @@ public class Caesar {
                                 details, "event <description> /from <start> /to <end>")));
                         case LIST -> {
                             if ("sorted".equals(details)) {
-                                ArrayList<Task> sortedTasks = new ArrayList<>(tasks);
-                                sortedTasks.sort(Comparator.comparing(Task::isDone));
-                                printTaskList(sortedTasks);
+                                printTaskList(tasks.sortedByStatus());
                             } else {
                                 //add list by date and time sorting later. maybe also just tasks of a specific date.
                                 printTaskList(tasks);
@@ -156,7 +152,7 @@ public class Caesar {
      * @throws CaesarException if the file cannot be read or contains invalid data
      */
     private static ArrayList<Task> loadTasksFromFile(Path filePath) throws CaesarException {
-        ArrayList<Task> tasks = new ArrayList<>(MAX_TASKS);
+        ArrayList<Task> tasks = new ArrayList<>();
         File file = filePath.toFile();
         try {
             Path parent = filePath.getParent();
@@ -176,9 +172,6 @@ public class Caesar {
                     lineNumber++;
                     if (line.isBlank()) {
                         continue;
-                    }
-                    if (tasks.size() >= MAX_TASKS) {
-                        throw new CaesarException("Task file contains more than " + MAX_TASKS + " tasks.");
                     }
                     tasks.add(parseTask(line, lineNumber));
                 }
@@ -201,7 +194,7 @@ public class Caesar {
     /**
      * Saves the complete task list to the task file.
      */
-    private static void saveTasksToFile(ArrayList<Task> tasks, Path filePath) throws CaesarException {
+    private static void saveTasksToFile(Iterable<Task> tasks, Path filePath) throws CaesarException {
         Path parent = filePath.getParent();
         try {
             if (parent != null) {
@@ -289,27 +282,23 @@ public class Caesar {
     }
 
     // Compatibility wrapper that accepts a string path for callers from earlier levels.
-    private static void saveTasks(ArrayList<Task> tasks) throws CaesarException {
+    private static void saveTasks(TaskList tasks) throws CaesarException {
         saveTasksToFile(tasks, TASK_FILE);
     }
 
-    private static void addTask(ArrayList<Task> tasks, Task task) throws CaesarException {
-        if (tasks.size() >= MAX_TASKS) {
-            throw new CaesarException("You have too many tasks undone. Please finish some first before adding more");
-        }
-
+    private static void addTask(TaskList tasks, Task task) throws CaesarException {
         tasks.add(task);
         try {
             saveTasks(tasks);
         } catch (CaesarException exception) {
-            tasks.remove(tasks.size() - 1);
+            tasks.delete(tasks.size());
             throw exception;
         }
         System.out.println("Got it. I've safely recorded this for you:\n" + task);
         DynamicComment(tasks);
     }
 
-    private static void DynamicComment(ArrayList<Task> tasks) {
+    private static void DynamicComment(TaskList tasks) {
         if (tasks.size() < 3) {
             System.out.println("Now you have " + tasks.size() + " tasks in the list.\n" 
             + "Here is what we have lined up: \n" + tasks +" \nA light and manageable day ahead—you've got this effortlessly."
@@ -324,17 +313,14 @@ public class Caesar {
         System.out.println(DIVIDER);
     }
 
-    private static void deleteTask(ArrayList<Task> tasks, String details) throws CaesarException {
+    private static void deleteTask(TaskList tasks, String details) throws CaesarException {
         int taskNumber = parseTaskNumber(details, "delete <task number>");
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new CaesarException("I couldn't locate that specific item number on our list. Take a quick look at /list/ to check the numbering.");
-        }
-
-        Task removedTask = tasks.remove(taskNumber - 1);
+        Task removedTask = tasks.delete(taskNumber);
         try {
             saveTasks(tasks);
         } catch (CaesarException exception) {
-            tasks.add(taskNumber - 1, removedTask);
+            // Restore the removed task at its original position if saving fails.
+            tasks.insert(taskNumber, removedTask);
             throw exception;
         }
         System.out.println("Noted. I've removed this task:\n" + removedTask
@@ -342,39 +328,33 @@ public class Caesar {
         System.out.println(DIVIDER);
     }
 
-    private static void printTaskList(ArrayList<Task> tasks) throws CaesarException {
-        if (tasks.isEmpty()) {
+    private static void printTaskList(Iterable<Task> tasks) throws CaesarException {
+        ArrayList<Task> taskItems = new ArrayList<>();
+        for (Task task : tasks) {
+            taskItems.add(task);
+        }
+        if (taskItems.isEmpty()) {
             throw new CaesarException("Your schedule is completely clear right now. Take this time to relax and recharge");
         }
 
         System.out.println("Here are the tasks in your list:\n");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+        for (int i = 0; i < taskItems.size(); i++) {
+            System.out.println((i + 1) + "." + taskItems.get(i));
         }
 
-        boolean allDone = true;
-        for (Task task : tasks) {
-            if (!task.isDone()) {
-                allDone = false;
-                break;
-            }
-        }
+        boolean allDone = taskItems.stream().allMatch(Task::isDone);
         if (allDone) {
             System.out.println("\nCongrats! You have completed all your tasks!");
         }
         System.out.println(DIVIDER);
     }
 
-    private static void updateTaskStatus(ArrayList<Task> tasks, CommandType action,
+    private static void updateTaskStatus(TaskList tasks, CommandType action,
                                          String details) throws CaesarException {
         int taskNumber = parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new CaesarException("I couldn't locate that specific item number on our list. Take a quick look at /list/ to check the numbering.");
-        }
-
-        Task task = tasks.get(taskNumber - 1);
+        Task task = tasks.get(taskNumber);
         if (action == CommandType.MARK) {
-            task.markAsDone();
+            tasks.mark(taskNumber);
             try {
                 saveTasks(tasks);
             } catch (CaesarException exception) {
@@ -383,7 +363,7 @@ public class Caesar {
             }
             System.out.println("Well done, proud of your progress. I've marked this as complete:\n" + task);
         } else {
-            task.markAsNotDone();
+            tasks.unmark(taskNumber);
             try {
                 saveTasks(tasks);
             } catch (CaesarException exception) {

@@ -92,8 +92,10 @@ public class Caesar {
                                 details, "event <description> /from <start> /to <end>"))).execute(tasks, ui, storage);
                         case LIST -> new ListCommand("sorted".equals(details))
                                 .execute(tasks, ui, storage);
-                        case MARK -> updateTaskStatus(CommandType.MARK, details);
-                        case UNMARK -> updateTaskStatus(CommandType.UNMARK, details);
+                        case MARK -> new MarkCommand(parser.parseTaskNumber(
+                                details, "mark <task number>")).execute(tasks, ui, storage);
+                        case UNMARK -> new UnmarkCommand(parser.parseTaskNumber(
+                                details, "unmark <task number>")).execute(tasks, ui, storage);
                         case DELETE -> new DeleteCommand(parser.parseTaskNumber(
                                 details, "delete <task number>")).execute(tasks, ui, storage);
                         case BYE -> {
@@ -130,35 +132,6 @@ public class Caesar {
         // Reuse TaskList's capacity validation for callers of the old helper.
         new TaskList(tasks);
         return tasks;
-    }
-
-    // Compatibility wrapper that accepts a string path for callers from earlier levels.
-    private void saveTasks() throws CaesarException {
-        storage.save(tasks);
-    }
-
-    private void updateTaskStatus(CommandType action, String details) throws CaesarException {
-        int taskNumber = parser.parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
-        Task task = tasks.get(taskNumber);
-        if (action == CommandType.MARK) {
-            tasks.mark(taskNumber);
-            try {
-                saveTasks();
-            } catch (CaesarException exception) {
-                task.markAsNotDone();
-                throw exception;
-            }
-            ui.showTaskMarked(task);
-        } else {
-            tasks.unmark(taskNumber);
-            try {
-                saveTasks();
-            } catch (CaesarException exception) {
-                task.markAsDone();
-                throw exception;
-            }
-            ui.showTaskUnmarked(task);
-        }
     }
 
 }

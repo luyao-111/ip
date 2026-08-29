@@ -4,8 +4,18 @@ import java.util.ArrayList;
  * Runs the Caesar command-line task assistant and coordinates task persistence.
  */
 public class Caesar {
-    /** Relative path so the application can be moved to another computer or OS. */
-    private static final Storage STORAGE = new Storage("data/tasks.txt");
+    /** Provides access to the task file. */
+    private final Storage storage;
+    /** Handles all console input and output. */
+    private final Ui ui;
+    /** Interprets commands entered by the user. */
+    private final Parser parser;
+    /** Holds the tasks currently managed by the application. */
+    private final TaskList tasks;
+    /** Records whether storage created the task file during construction. */
+    private final boolean fileWasCreated;
+    /** Stores a loading error so it can be displayed when {@link #run()} starts. */
+    private final CaesarException loadingError;
 
     /** Supported command keywords. Kept here for compatibility with earlier levels. */
     public enum CommandType {
@@ -33,22 +43,37 @@ public class Caesar {
         }
     }
 
-    public static void main(String[] args) {
-        try (Ui ui = new Ui()) {
-            ui.showWelcome();
+    /** Creates Caesar with the supplied task-file path. */
+    public Caesar(String filePath) {
+        storage = new Storage(filePath);
+        ui = new Ui();
+        parser = new Parser();
 
-            TaskList tasks;
-            try {
-                tasks = new TaskList(STORAGE.load());
-                if (STORAGE.wasFileCreated()) {
-                    ui.showFileCreated(STORAGE.getFilePath());
-                }
-            } catch (CaesarException exception) {
-                ui.showLoadingError(exception);
-                tasks = new TaskList();
-            }
+        TaskList loadedTasks;
+        CaesarException loadFailure = null;
+        boolean createdFile = false;
+        try {
+            loadedTasks = new TaskList(storage.load());
+            createdFile = storage.wasFileCreated();
+        } catch (CaesarException exception) {
+            loadFailure = exception;
+            loadedTasks = new TaskList();
+        }
+        tasks = loadedTasks;
+        fileWasCreated = createdFile;
+        loadingError = loadFailure;
+    }
 
-            Parser parser = new Parser();
+    /** Runs the command loop until the user enters {@code bye} or input ends. */
+    public void run() {
+        ui.showWelcome();
+        if (loadingError != null) {
+            ui.showLoadingError(loadingError);
+        } else if (fileWasCreated) {
+            ui.showFileCreated(storage.getFilePath());
+        }
+
+        try {
             while (ui.hasNextCommand()) {
                 String command = ui.readCommand();
                 ui.showDivider();
@@ -59,12 +84,11 @@ public class Caesar {
 
                 try {
                     switch (commandType) {
-                        case TODO -> addTask(tasks,
-                                new ToDo(parser.requireDetails(details, "todo <description>")), ui);
-                        case DEADLINE -> addTask(tasks, parser.createDeadline(parser.requireDetails(
-                                details, "deadline <description> /by <date or time>")), ui);
-                        case EVENT -> addTask(tasks, parser.createEvent(parser.requireDetails(
-                                details, "event <description> /from <start> /to <end>")), ui);
+                        case TODO -> addTask(new ToDo(parser.requireDetails(details, "todo <description>")));
+                        case DEADLINE -> addTask(parser.createDeadline(parser.requireDetails(
+                                details, "deadline <description> /by <date or time>")));
+                        case EVENT -> addTask(parser.createEvent(parser.requireDetails(
+                                details, "event <description> /from <start> /to <end>")));
                         case LIST -> {
                             if ("sorted".equals(details)) {
                                 ui.showTaskList(tasks.sortedByStatus());
@@ -73,9 +97,9 @@ public class Caesar {
                                 ui.showTaskList(tasks);
                             }
                         }
-                        case MARK -> updateTaskStatus(tasks, CommandType.MARK, details, parser, ui);
-                        case UNMARK -> updateTaskStatus(tasks, CommandType.UNMARK, details, parser, ui);
-                        case DELETE -> deleteTask(tasks, details, parser, ui);
+                        case MARK -> updateTaskStatus(CommandType.MARK, details);
+                        case UNMARK -> updateTaskStatus(CommandType.UNMARK, details);
+                        case DELETE -> deleteTask(details);
                         case BYE -> {
                             if (details != null) {
                                 throw parser.unknownCommand();
@@ -89,12 +113,20 @@ public class Caesar {
                     ui.showError(exception);
                 }
             }
+        } finally {
+            ui.close();
         }
     }
-    private static void addTask(TaskList tasks, Task task, Ui ui) throws CaesarException {
+
+    /** Starts Caesar with its default task-file location. */
+    public static void main(String[] args) {
+        new Caesar("data/tasks.txt").run();
+    }
+
+    private void addTask(Task task) throws CaesarException {
         tasks.add(task);
         try {
-            saveTasks(tasks);
+            saveTasks();
         } catch (CaesarException exception) {
             tasks.delete(tasks.size());
             throw exception;
@@ -112,15 +144,15 @@ public class Caesar {
     }
 
     // Compatibility wrapper that accepts a string path for callers from earlier levels.
-    private static void saveTasks(TaskList tasks) throws CaesarException {
-        STORAGE.save(tasks);
+    private void saveTasks() throws CaesarException {
+        storage.save(tasks);
     }
 
-    private static void deleteTask(TaskList tasks, String details, Parser parser, Ui ui) throws CaesarException {
+    private void deleteTask(String details) throws CaesarException {
         int taskNumber = parser.parseTaskNumber(details, "delete <task number>");
         Task removedTask = tasks.delete(taskNumber);
         try {
-            saveTasks(tasks);
+            saveTasks();
         } catch (CaesarException exception) {
             // Restore the removed task at its original position if saving fails.
             tasks.insert(taskNumber, removedTask);
@@ -129,14 +161,13 @@ public class Caesar {
         ui.showTaskDeleted(removedTask, tasks);
     }
 
-    private static void updateTaskStatus(TaskList tasks, CommandType action,
-                                         String details, Parser parser, Ui ui) throws CaesarException {
+    private void updateTaskStatus(CommandType action, String details) throws CaesarException {
         int taskNumber = parser.parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
         Task task = tasks.get(taskNumber);
         if (action == CommandType.MARK) {
             tasks.mark(taskNumber);
             try {
-                saveTasks(tasks);
+                saveTasks();
             } catch (CaesarException exception) {
                 task.markAsNotDone();
                 throw exception;
@@ -145,7 +176,7 @@ public class Caesar {
         } else {
             tasks.unmark(taskNumber);
             try {
-                saveTasks(tasks);
+                saveTasks();
             } catch (CaesarException exception) {
                 task.markAsDone();
                 throw exception;

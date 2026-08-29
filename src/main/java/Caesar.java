@@ -84,11 +84,12 @@ public class Caesar {
 
                 try {
                     switch (commandType) {
-                        case TODO -> addTask(new ToDo(parser.requireDetails(details, "todo <description>")));
-                        case DEADLINE -> addTask(parser.createDeadline(parser.requireDetails(
-                                details, "deadline <description> /by <date or time>")));
-                        case EVENT -> addTask(parser.createEvent(parser.requireDetails(
-                                details, "event <description> /from <start> /to <end>")));
+                        case TODO -> new AddCommand(new ToDo(parser.requireDetails(
+                                details, "todo <description>"))).execute(tasks, ui, storage);
+                        case DEADLINE -> new AddCommand(parser.createDeadline(parser.requireDetails(
+                                details, "deadline <description> /by <date or time>"))).execute(tasks, ui, storage);
+                        case EVENT -> new AddCommand(parser.createEvent(parser.requireDetails(
+                                details, "event <description> /from <start> /to <end>"))).execute(tasks, ui, storage);
                         case LIST -> new ListCommand("sorted".equals(details))
                                 .execute(tasks, ui, storage);
                         case MARK -> updateTaskStatus(CommandType.MARK, details);
@@ -120,16 +121,6 @@ public class Caesar {
         new Caesar("data/tasks.txt").run();
     }
 
-    private void addTask(Task task) throws CaesarException {
-        tasks.add(task);
-        try {
-            saveTasks();
-        } catch (CaesarException exception) {
-            tasks.delete(tasks.size());
-            throw exception;
-        }
-        ui.showTaskAdded(task, tasks);
-    }
     /**
      * Compatibility wrapper that accepts a string path for callers from earlier levels.
      */

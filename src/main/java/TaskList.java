@@ -84,6 +84,8 @@ public class TaskList implements Iterable<Task> {
         return sortedTasks;
     }
 
+    //Can add filtering methods here, e.g. by date, by type, etc.
+
     /** Returns the number of tasks in the list. */
     public int size() {
         return tasks.size();
@@ -105,7 +107,7 @@ public class TaskList implements Iterable<Task> {
         return tasks.toString();
     }
 
-    /** Allows storage code to read tasks without owning the collection. */
+    /** Allows storage code to read tasks without owning the collection.Allows for-loops over tasks */
     @Override
     public Iterator<Task> iterator() {
         return List.copyOf(tasks).iterator();

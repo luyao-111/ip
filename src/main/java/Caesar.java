@@ -1,13 +1,6 @@
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -18,7 +11,7 @@ import java.time.format.DateTimeParseException;
 public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
     /** Relative path so the application can be moved to another computer or OS. */
-    private static final Path TASK_FILE = Paths.get("data", "tasks.txt");
+    private static final Storage STORAGE = new Storage("data/tasks.txt");
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
     private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
             + "event <description> /from <start> /to <end>, list, mark <number>, "
@@ -64,7 +57,11 @@ public class Caesar {
 
         TaskList tasks;
         try {
-            tasks = new TaskList(loadTasksFromFile(TASK_FILE));
+            tasks = new TaskList(STORAGE.load());
+            if (STORAGE.wasFileCreated()) {
+                System.out.println("Task file not found. A new task file has been created at: "
+                        + STORAGE.getFilePath());
+            }
         } catch (CaesarException e) {
             System.out.println("Error loading tasks from file: " + e.getMessage());
             tasks = new TaskList();
@@ -144,146 +141,18 @@ public class Caesar {
     }
 
     /**
-     * Loads all saved tasks from a relative, platform-independent path.
-     * A missing file and its parent directory are created automatically.
-     *
-     * @param filePath path of the task file
-     * @return tasks read from the file
-     * @throws CaesarException if the file cannot be read or contains invalid data
-     */
-    private static ArrayList<Task> loadTasksFromFile(Path filePath) throws CaesarException {
-        ArrayList<Task> tasks = new ArrayList<>();
-        File file = filePath.toFile();
-        try {
-            Path parent = filePath.getParent();
-            if (parent != null) {
-                Files.createDirectories(parent);
-            }
-            if (!file.exists()) {
-                file.createNewFile();
-                System.out.println("Task file not found. A new task file has been created at: " + filePath);
-            }
-
-            // Scanner reads the saved file line by line.
-            try (Scanner fileScanner = new Scanner(file)) {
-                int lineNumber = 0;
-                while (fileScanner.hasNextLine()) {
-                    String line = fileScanner.nextLine();
-                    lineNumber++;
-                    if (line.isBlank()) {
-                        continue;
-                    }
-                    tasks.add(parseTask(line, lineNumber));
-                }
-            }
-        } catch (FileNotFoundException exception) {
-            throw new CaesarException("Failed to read task file " + filePath + ": " + exception.getMessage());
-        } catch (IOException exception) {
-            throw new CaesarException("Failed to read task file " + filePath + ": " + exception.getMessage());
-        }
-        return tasks;
-    }
-
-    /**
      * Compatibility wrapper that accepts a string path for callers from earlier levels.
      */
     static ArrayList<Task> LoadTasksfromFile(String filePath) throws CaesarException {
-        return loadTasksFromFile(Paths.get(filePath));
-    }
-
-    /**
-     * Saves the complete task list to the task file.
-     */
-    private static void saveTasksToFile(Iterable<Task> tasks, Path filePath) throws CaesarException {
-        Path parent = filePath.getParent();
-        try {
-            if (parent != null) {
-                Files.createDirectories(parent);
-            }
-            // FileWriter overwrites the file by default; the full task list is saved each time.
-            try (FileWriter writer = new FileWriter(filePath.toFile())) {
-                for (Task task : tasks) {
-                    writer.write(serializeTask(task));
-                    writer.write(System.lineSeparator()); //OS-independent line separator (replace other \n later?)
-                }
-            }
-        } catch (IOException exception) {
-            throw new CaesarException("Failed to save tasks to file " + filePath + ": " + exception.getMessage());
-        }
-    }
-
-    private static String serializeTask(Task task) {
-        String status = task.isDone() ? "1" : "0";
-        if (task instanceof Deadline deadline) {
-            return String.join(" | ", "D", status, task.getDescription(), deadline.getBy());
-        }
-        if (task instanceof Event event) {
-            return String.join(" | ", "E", status, task.getDescription(), event.getStart(), event.getEnd());
-        }
-        return String.join(" | ", "T", status, task.getDescription());
-    }
-
-    private static Task parseTask(String line, int lineNumber) throws CaesarException {
-        String[] parts = line.split("\\|", -1);
-        String type = parts.length > 0 ? parts[0].trim() : "";
-        int expectedParts = switch (type) {
-            case "T" -> 3;
-            case "D" -> 4;
-            case "E" -> 5;
-            default -> throw invalidTaskLine(lineNumber, "unknown task type " + type);
-        };
-        if (parts.length != expectedParts) {
-            throw invalidTaskLine(lineNumber, "expected " + expectedParts + " fields but found " + parts.length);
-        }
-
-        boolean isDone = parseStatus(parts[1].trim(), lineNumber);
-        String description = requireFileField(parts[2], "description", lineNumber);
-        Task task;
-        if ("T".equals(type)) {
-            task = new ToDo(description);
-        } else if ("D".equals(type)) {
-            task = new Deadline(description, requireFileField(parts[3], "deadline", lineNumber));
-        } else {
-            task = new Event(description,
-                    requireFileField(parts[3], "event start", lineNumber),
-                    requireFileField(parts[4], "event end", lineNumber));
-        }
-
-        if (isDone) {
-            try {
-                task.markAsDone();
-            } catch (CaesarException exception) {
-                throw invalidTaskLine(lineNumber, exception.getMessage());
-            }
-        }
-        return task;
-    }
-
-    private static boolean parseStatus(String status, int lineNumber) throws CaesarException {
-    if ("1".equals(status)) {
-        return true;
-    }
-    if ("0".equals(status)) {
-        return false;
-    }
-    throw invalidTaskLine(lineNumber, "status must be 1 or 0");
-    }
-
-    private static String requireFileField(String value, String fieldName, int lineNumber) throws CaesarException {
-        String trimmedValue = value.trim();
-        if (trimmedValue.isEmpty()) {
-            throw invalidTaskLine(lineNumber, fieldName + " cannot be empty");
-        }
-        return trimmedValue;
-    }
-
-    private static CaesarException invalidTaskLine(int lineNumber, String reason) {
-        return new CaesarException("Invalid task data on line " + lineNumber + ": " + reason);
+        ArrayList<Task> tasks = new Storage(filePath).load();
+        // Reuse TaskList's capacity validation for callers of the old helper.
+        new TaskList(tasks);
+        return tasks;
     }
 
     // Compatibility wrapper that accepts a string path for callers from earlier levels.
     private static void saveTasks(TaskList tasks) throws CaesarException {
-        saveTasksToFile(tasks, TASK_FILE);
+        STORAGE.save(tasks);
     }
 
     private static void addTask(TaskList tasks, Task task) throws CaesarException {

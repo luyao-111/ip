@@ -104,8 +104,11 @@ public class Caesar {
                             if (details != null) {
                                 throw parser.unknownCommand();
                             }
-                            ui.showGoodbye();
-                            return;
+                            Command exitCommand = new ExitCommand();
+                            exitCommand.execute(tasks, ui, storage);
+                            if (exitCommand.isExit()) {
+                                return;
+                            }
                         }
                         case UNKNOWN -> throw parser.unknownCommand();
                     }

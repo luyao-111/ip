@@ -1,9 +1,5 @@
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Scanner;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 /**
  * Runs the Caesar command-line task assistant and coordinates task persistence.
@@ -12,11 +8,8 @@ public class Caesar {
     private static final String DIVIDER = "____________________________________________________________";
     /** Relative path so the application can be moved to another computer or OS. */
     private static final Storage STORAGE = new Storage("data/tasks.txt");
-    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
-    private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
-            + "event <description> /from <start> /to <end>, list, mark <number>, "
-            + "unmark <number>, delete <number>, or bye";
 
+    /** Supported command keywords. Kept here for compatibility with earlier levels. */
     public enum CommandType {
         TODO,
         DEADLINE,
@@ -28,6 +21,7 @@ public class Caesar {
         BYE,
         UNKNOWN;
 
+        /** Converts a command keyword into its corresponding command type. */
         public static CommandType fromString(String command) {
             if (command == null || command.isBlank()) {
                 return UNKNOWN;
@@ -52,7 +46,8 @@ public class Caesar {
         System.out.print(DIVIDER + "\n" + "\n");
         System.out.println(banner);
         System.out.println("Hello! I'm Caesar.\nYou look even brighter than the last time we spoke.\nHow may I ease your day today?");
-        System.out.println("\nYou can enter the following commands: " + COMMANDS);
+        System.out.println("\nYou can enter the following commands: "
+                + Parser.getCommandInstructions());
         System.out.println(DIVIDER);
 
         TaskList tasks;
@@ -67,23 +62,23 @@ public class Caesar {
             tasks = new TaskList();
         }
 
+        Parser parser = new Parser();
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 System.out.println(DIVIDER);
 
-                String[] commandParts = command.trim().split("\\s+", 2);
-                String prefix = commandParts.length > 0 ? commandParts[0] : "";
-                String details = commandParts.length > 1 ? commandParts[1] : null;
-                CommandType commandType = CommandType.fromString(prefix);
+                Parser.ParsedCommand parsedCommand = parser.parse(command);
+                CommandType commandType = parsedCommand.getType();
+                String details = parsedCommand.getDetails();
 
                 try {
                     switch (commandType) {
                         case TODO -> addTask(tasks,
-                                new ToDo(requireDetails(details, "todo <description>")));
-                        case DEADLINE -> addTask(tasks, createDeadline(requireDetails(
+                                new ToDo(parser.requireDetails(details, "todo <description>")));
+                        case DEADLINE -> addTask(tasks, parser.createDeadline(parser.requireDetails(
                                 details, "deadline <description> /by <date or time>")));
-                        case EVENT -> addTask(tasks, createEvent(requireDetails(
+                        case EVENT -> addTask(tasks, parser.createEvent(parser.requireDetails(
                                 details, "event <description> /from <start> /to <end>")));
                         case LIST -> {
                             if ("sorted".equals(details)) {
@@ -93,18 +88,18 @@ public class Caesar {
                                 printTaskList(tasks);
                             }
                         }
-                        case MARK -> updateTaskStatus(tasks, CommandType.MARK, details);
-                        case UNMARK -> updateTaskStatus(tasks, CommandType.UNMARK, details);
-                        case DELETE -> deleteTask(tasks, details);
+                        case MARK -> updateTaskStatus(tasks, CommandType.MARK, details, parser);
+                        case UNMARK -> updateTaskStatus(tasks, CommandType.UNMARK, details, parser);
+                        case DELETE -> deleteTask(tasks, details, parser);
                         case BYE -> {
                             if (details != null) {
-                                throw unknownCommand();
+                                throw parser.unknownCommand();
                             }
                             System.out.println("You handled today wonderfully. \nUntil next time—I'm always in your corner.");
                             System.out.println(DIVIDER);
                             return;
                         }
-                        case UNKNOWN -> throw unknownCommand();
+                        case UNKNOWN -> throw parser.unknownCommand();
                     }
                 } catch (CaesarException exception) {
                     System.out.println(exception.getMessage());
@@ -113,33 +108,17 @@ public class Caesar {
             }
         }
     }
-    
-    /**
-     * Converts a date string in the format YYYY-MM-DD to a more readable format.
-     *
-     * @param time the date string to convert
-     * @return the converted date string in the format MMM d yyyy
-     * @throws CaesarException if the input date string is not in the expected format
-     */
-
-    private static String convertTime(String time) throws CaesarException {
-        String trimmed = time.trim();
-        LocalDate date;
-
+    private static void addTask(TaskList tasks, Task task) throws CaesarException {
+        tasks.add(task);
         try {
-            // 1. Try standard ISO format: yyyy-MM-dd
-            date = LocalDate.parse(trimmed);
-        } catch (DateTimeParseException e1) {
-            try {
-                // 2. Fallback: try MMM d yyyy to avoid error when reading the file
-                date = LocalDate.parse(trimmed, DISPLAY_FORMAT);
-            } catch (DateTimeParseException e2) {
-                throw new CaesarException("Invalid date format. Please use YYYY-MM-DD or MMM d yyyy.");
-            }
+            saveTasks(tasks);
+        } catch (CaesarException exception) {
+            tasks.delete(tasks.size());
+            throw exception;
         }
-        return date.format(DISPLAY_FORMAT);
+        System.out.println("Got it. I've safely recorded this for you:\n" + task);
+        DynamicComment(tasks);
     }
-
     /**
      * Compatibility wrapper that accepts a string path for callers from earlier levels.
      */
@@ -153,18 +132,6 @@ public class Caesar {
     // Compatibility wrapper that accepts a string path for callers from earlier levels.
     private static void saveTasks(TaskList tasks) throws CaesarException {
         STORAGE.save(tasks);
-    }
-
-    private static void addTask(TaskList tasks, Task task) throws CaesarException {
-        tasks.add(task);
-        try {
-            saveTasks(tasks);
-        } catch (CaesarException exception) {
-            tasks.delete(tasks.size());
-            throw exception;
-        }
-        System.out.println("Got it. I've safely recorded this for you:\n" + task);
-        DynamicComment(tasks);
     }
 
     private static void DynamicComment(TaskList tasks) {
@@ -182,8 +149,8 @@ public class Caesar {
         System.out.println(DIVIDER);
     }
 
-    private static void deleteTask(TaskList tasks, String details) throws CaesarException {
-        int taskNumber = parseTaskNumber(details, "delete <task number>");
+    private static void deleteTask(TaskList tasks, String details, Parser parser) throws CaesarException {
+        int taskNumber = parser.parseTaskNumber(details, "delete <task number>");
         Task removedTask = tasks.delete(taskNumber);
         try {
             saveTasks(tasks);
@@ -219,8 +186,8 @@ public class Caesar {
     }
 
     private static void updateTaskStatus(TaskList tasks, CommandType action,
-                                         String details) throws CaesarException {
-        int taskNumber = parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
+                                         String details, Parser parser) throws CaesarException {
+        int taskNumber = parser.parseTaskNumber(details, action.name().toLowerCase() + " <task number>");
         Task task = tasks.get(taskNumber);
         if (action == CommandType.MARK) {
             tasks.mark(taskNumber);
@@ -244,68 +211,4 @@ public class Caesar {
         System.out.println(DIVIDER);
     }
 
-    private static Task createDeadline(String details) throws CaesarException {
-        String[] commandParts = details.split("/by", 2);
-        if (commandParts.length != 2) {
-            throw missingDetails("deadline <description> /by <date or time>");
-        }
-
-        String description = commandParts[0].trim();
-        String by = commandParts[1].trim();
-        String formattedBy = convertTime(by);
-        if (description.isEmpty() || by.isEmpty()) {
-            throw missingDetails("deadline <description> /by <date or time>");
-        }
-        return new Deadline(description, formattedBy);
-    }
-
-    private static Task createEvent(String details) throws CaesarException {
-        String[] commandParts = details.split("/from", 2);
-        if (commandParts.length != 2) {
-            throw missingDetails("event <description> /from <start> /to <end>");
-        }
-
-        String[] timeParts = commandParts[1].split("/to", 2);
-        if (timeParts.length != 2) {
-            throw missingDetails("event <description> /from <start> /to <end>");
-        }
-
-        String description = commandParts[0].trim();
-        String start = timeParts[0].trim();
-        String end = timeParts[1].trim();
-        String formattedStart = convertTime(start);
-        String formattedEnd = convertTime(end);
-        if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-            throw missingDetails("event <description> /from <start> /to <end>");
-        }
-        return new Event(description, formattedStart, formattedEnd);
-    }
-
-    private static int parseTaskNumber(String details, String format) throws CaesarException {
-        if (details == null || details.trim().isEmpty()) {
-            throw missingDetails(format);
-        }
-
-        try {
-            return Integer.parseInt(details.trim());
-        } catch (NumberFormatException exception) {
-            throw new CaesarException("Please provide a valid task number.");
-        }
-    }
-
-    private static String requireDetails(String details, String format) throws CaesarException {
-        if (details == null || details.trim().isEmpty()) {
-            throw missingDetails(format);
-        }
-        return details.trim();
-    }
-
-    private static CaesarException missingDetails(String format) {
-        return new CaesarException("I'd love to organize that for you, but I just need more details. Try enter in this format: " + format);
-    }
-
-    private static CaesarException unknownCommand() {
-        return new CaesarException("I'm not quite sure I caught that command, but take your time. Let's try again. "
-                + "Try these commands: " + COMMANDS);
-    }
 }

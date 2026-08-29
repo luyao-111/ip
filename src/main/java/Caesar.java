@@ -89,14 +89,8 @@ public class Caesar {
                                 details, "deadline <description> /by <date or time>")));
                         case EVENT -> addTask(parser.createEvent(parser.requireDetails(
                                 details, "event <description> /from <start> /to <end>")));
-                        case LIST -> {
-                            if ("sorted".equals(details)) {
-                                ui.showTaskList(tasks.sortedByStatus());
-                            } else {
-                                //add list by date and time sorting later. maybe also just tasks of a specific date.
-                                ui.showTaskList(tasks);
-                            }
-                        }
+                        case LIST -> new ListCommand("sorted".equals(details))
+                                .execute(tasks, ui, storage);
                         case MARK -> updateTaskStatus(CommandType.MARK, details);
                         case UNMARK -> updateTaskStatus(CommandType.UNMARK, details);
                         case DELETE -> deleteTask(details);

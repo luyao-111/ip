@@ -1,3 +1,11 @@
+package Caesar.command;
+
+import Caesar.exception.CaesarException;
+import Caesar.storage.Storage;
+import Caesar.task.Task;
+import Caesar.task.TaskList;
+import Caesar.ui.Ui;
+
 /** Marks one task as complete and persists the updated task list. */
 public class MarkCommand extends Command {
     /** One-based task number selected by the user. */

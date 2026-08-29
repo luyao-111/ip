@@ -1,3 +1,11 @@
+package Caesar.command;
+
+import Caesar.exception.CaesarException;
+import Caesar.storage.Storage;
+import Caesar.task.Task;
+import Caesar.task.TaskList;
+import Caesar.ui.Ui;
+
 /** Adds one task to the task list and persists the updated list. */
 public class AddCommand extends Command {
     /** The task that will be added when this command executes. */

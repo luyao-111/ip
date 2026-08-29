@@ -1,3 +1,5 @@
+package Caesar.exception;
+
 /**
  * Exception used for user-facing validation and persistence errors.
  */

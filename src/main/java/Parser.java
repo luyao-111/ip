@@ -32,6 +32,31 @@ public class Parser {
         return new ParsedCommand(Caesar.CommandType.fromString(prefix), details);
     }
 
+    /** Parses raw input and creates the command that should execute it. */
+    public Command parseCommand(String command) throws CaesarException {
+        ParsedCommand parsedCommand = parse(command);
+        String details = parsedCommand.getDetails();
+
+        return switch (parsedCommand.getType()) {
+            case TODO -> new AddCommand(new ToDo(requireDetails(details, "todo <description>")));
+            case DEADLINE -> new AddCommand(createDeadline(requireDetails(
+                    details, "deadline <description> /by <date or time>")));
+            case EVENT -> new AddCommand(createEvent(requireDetails(
+                    details, "event <description> /from <start> /to <end>")));
+            case LIST -> new ListCommand("sorted".equals(details));
+            case MARK -> new MarkCommand(parseTaskNumber(details, "mark <task number>"));
+            case UNMARK -> new UnmarkCommand(parseTaskNumber(details, "unmark <task number>"));
+            case DELETE -> new DeleteCommand(parseTaskNumber(details, "delete <task number>"));
+            case BYE -> {
+                if (details != null) {
+                    throw unknownCommand();
+                }
+                yield new ExitCommand();
+            }
+            case UNKNOWN -> throw unknownCommand();
+        };
+    }
+
     /** Creates a deadline from details in the form {@code description /by date}. */
     public Task createDeadline(String details) throws CaesarException {
         String[] commandParts = details.split("/by", 2);

@@ -78,37 +78,11 @@ public class Caesar {
                 String command = ui.readCommand();
                 ui.showDivider();
 
-                Parser.ParsedCommand parsedCommand = parser.parse(command);
-                CommandType commandType = parsedCommand.getType();
-                String details = parsedCommand.getDetails();
-
                 try {
-                    switch (commandType) {
-                        case TODO -> new AddCommand(new ToDo(parser.requireDetails(
-                                details, "todo <description>"))).execute(tasks, ui, storage);
-                        case DEADLINE -> new AddCommand(parser.createDeadline(parser.requireDetails(
-                                details, "deadline <description> /by <date or time>"))).execute(tasks, ui, storage);
-                        case EVENT -> new AddCommand(parser.createEvent(parser.requireDetails(
-                                details, "event <description> /from <start> /to <end>"))).execute(tasks, ui, storage);
-                        case LIST -> new ListCommand("sorted".equals(details))
-                                .execute(tasks, ui, storage);
-                        case MARK -> new MarkCommand(parser.parseTaskNumber(
-                                details, "mark <task number>")).execute(tasks, ui, storage);
-                        case UNMARK -> new UnmarkCommand(parser.parseTaskNumber(
-                                details, "unmark <task number>")).execute(tasks, ui, storage);
-                        case DELETE -> new DeleteCommand(parser.parseTaskNumber(
-                                details, "delete <task number>")).execute(tasks, ui, storage);
-                        case BYE -> {
-                            if (details != null) {
-                                throw parser.unknownCommand();
-                            }
-                            Command exitCommand = new ExitCommand();
-                            exitCommand.execute(tasks, ui, storage);
-                            if (exitCommand.isExit()) {
-                                return;
-                            }
-                        }
-                        case UNKNOWN -> throw parser.unknownCommand();
+                    Command commandObject = parser.parseCommand(command);
+                    commandObject.execute(tasks, ui, storage);
+                    if (commandObject.isExit()) {
+                        return;
                     }
                 } catch (CaesarException exception) {
                     ui.showError(exception);

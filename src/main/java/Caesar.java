@@ -94,7 +94,8 @@ public class Caesar {
                                 .execute(tasks, ui, storage);
                         case MARK -> updateTaskStatus(CommandType.MARK, details);
                         case UNMARK -> updateTaskStatus(CommandType.UNMARK, details);
-                        case DELETE -> deleteTask(details);
+                        case DELETE -> new DeleteCommand(parser.parseTaskNumber(
+                                details, "delete <task number>")).execute(tasks, ui, storage);
                         case BYE -> {
                             if (details != null) {
                                 throw parser.unknownCommand();
@@ -134,19 +135,6 @@ public class Caesar {
     // Compatibility wrapper that accepts a string path for callers from earlier levels.
     private void saveTasks() throws CaesarException {
         storage.save(tasks);
-    }
-
-    private void deleteTask(String details) throws CaesarException {
-        int taskNumber = parser.parseTaskNumber(details, "delete <task number>");
-        Task removedTask = tasks.delete(taskNumber);
-        try {
-            saveTasks();
-        } catch (CaesarException exception) {
-            // Restore the removed task at its original position if saving fails.
-            tasks.insert(taskNumber, removedTask);
-            throw exception;
-        }
-        ui.showTaskDeleted(removedTask, tasks);
     }
 
     private void updateTaskStatus(CommandType action, String details) throws CaesarException {

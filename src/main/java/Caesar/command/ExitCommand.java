@@ -1,8 +1,8 @@
-package Caesar.command;
+package caesar.command;
 
-import Caesar.storage.Storage;
-import Caesar.task.TaskList;
-import Caesar.ui.Ui;
+import caesar.storage.Storage;
+import caesar.task.TaskList;
+import caesar.ui.Ui;
 
 /** A command that says goodbye and ends the application. */
 public class ExitCommand extends Command {

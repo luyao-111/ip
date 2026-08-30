@@ -1,6 +1,6 @@
-package Caesar.task;
+package caesar.task;
 
-import Caesar.exception.CaesarException;
+import caesar.exception.CaesarException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +18,8 @@ import java.util.List;
 public class TaskList implements Iterable<Task> {
     private static final int MAX_TASKS = 100;
     private static final String INVALID_TASK_NUMBER =
-            "I couldn't locate that specific item number on our list. Take a quick look at /list/ to check the numbering.";
+            "I couldn't locate that specific item number on our list. "
+                    + "Take a quick look at /list/ to check the numbering.";
 
     private final ArrayList<Task> tasks;
 
@@ -88,7 +89,7 @@ public class TaskList implements Iterable<Task> {
         return sortedTasks;
     }
 
-    //Can add filtering methods here, e.g. by date, by type, etc.
+    // Can add filtering methods here, e.g. by date, by type, etc.
 
     /** Returns the number of tasks in the list. */
     public int size() {
@@ -111,12 +112,13 @@ public class TaskList implements Iterable<Task> {
         return tasks.toString();
     }
 
-    /** Allows storage code to read tasks without owning the collection.Allows for-loops over tasks */
+    /** Allows storage code to read tasks without owning the collection and supports for-loops over tasks. */
     @Override
     public Iterator<Task> iterator() {
         return List.copyOf(tasks).iterator();
     }
 
+    /** Validates that a one-based task number refers to an existing task. */
     private void validateTaskNumber(int taskNumber) throws CaesarException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new CaesarException(INVALID_TASK_NUMBER);

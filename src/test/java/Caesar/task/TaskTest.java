@@ -1,6 +1,6 @@
-package Caesar.task;
+package caesar.task;
 
-import Caesar.exception.CaesarException;
+import caesar.exception.CaesarException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

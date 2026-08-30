@@ -1,10 +1,10 @@
-package Caesar.command;
+package caesar.command;
 
-import Caesar.exception.CaesarException;
-import Caesar.storage.Storage;
-import Caesar.task.Task;
-import Caesar.task.TaskList;
-import Caesar.ui.Ui;
+import caesar.exception.CaesarException;
+import caesar.storage.Storage;
+import caesar.task.Task;
+import caesar.task.TaskList;
+import caesar.ui.Ui;
 
 /** Deletes one task and persists the updated task list. */
 public class DeleteCommand extends Command {

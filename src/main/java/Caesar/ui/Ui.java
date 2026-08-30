@@ -108,6 +108,15 @@ public class Ui implements AutoCloseable {
         showDivider();
     }
 
+    /**Prints tasks including key words. */
+    public void showTaskFound(TaskList foundTasks) throws CaesarException {
+        System.out.print("Here are the matching tasks in your list:");
+        for (int i = 0; i < foundTasks.size(); i++) {
+            System.out.println((i + 1) + "." + foundTasks.get(i));
+        }
+        
+    }
+
     /** Prints tasks with one-based numbering and completion feedback. */
     public void showTaskList(Iterable<Task> tasks) throws CaesarException {
         ArrayList<Task> taskItems = new ArrayList<>();

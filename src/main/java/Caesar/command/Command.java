@@ -1,9 +1,9 @@
-package Caesar.command;
+package caesar.command;
 
-import Caesar.exception.CaesarException;
-import Caesar.storage.Storage;
-import Caesar.task.TaskList;
-import Caesar.ui.Ui;
+import caesar.exception.CaesarException;
+import caesar.storage.Storage;
+import caesar.task.TaskList;
+import caesar.ui.Ui;
 
 /**
  * An executable user command.

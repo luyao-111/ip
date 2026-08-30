@@ -1,9 +1,10 @@
-package Caesar.ui;
+package caesar.ui;
 
-import Caesar.exception.CaesarException;
-import Caesar.parser.Parser;
-import Caesar.task.Task;
-import Caesar.task.TaskList;
+import caesar.Caesar;
+import caesar.exception.CaesarException;
+import caesar.parser.Parser;
+import caesar.task.Task;
+import caesar.task.TaskList;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,7 +37,9 @@ public class Ui implements AutoCloseable {
         showDivider();
         System.out.println();
         System.out.println(banner);
-        System.out.println("Hello! I'm Caesar.\nYou look even brighter than the last time we spoke.\nHow may I ease your day today?");
+        System.out.println("Hello! I'm Caesar.\n"
+                + "You look even brighter than the last time we spoke.\n"
+                + "How may I ease your day today?");
         System.out.println("\nYou can enter the following commands: "
                 + Parser.getCommandInstructions());
         showDivider();
@@ -88,7 +91,8 @@ public class Ui implements AutoCloseable {
     /** Prints feedback after deleting a task. */
     public void showTaskDeleted(Task task, TaskList tasks) {
         System.out.println("Noted. I've removed this task:\n" + task
-                + "\nNow you have " + tasks.size() + " tasks in the list.\nI'm glad that you got some of your own time");
+                + "\nNow you have " + tasks.size() + " tasks in the list.\n"
+                + "I'm glad that you got some of your own time");
         showDivider();
     }
 
@@ -111,7 +115,9 @@ public class Ui implements AutoCloseable {
             taskItems.add(task);
         }
         if (taskItems.isEmpty()) {
-            throw new CaesarException("Your schedule is completely clear right now. Take this time to relax and recharge");
+            throw new CaesarException(
+                    "Your schedule is completely clear right now. "
+                            + "Take this time to relax and recharge");
         }
 
         System.out.println("Here are the tasks in your list:\n");

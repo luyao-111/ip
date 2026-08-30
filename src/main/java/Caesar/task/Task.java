@@ -1,6 +1,6 @@
-package Caesar.task;
+package caesar.task;
 
-import Caesar.exception.CaesarException;
+import caesar.exception.CaesarException;
 
 /**
  * A task that can be completed or left pending.

@@ -1,12 +1,12 @@
-package Caesar;
+package caesar;
 
-import Caesar.command.Command;
-import Caesar.exception.CaesarException;
-import Caesar.parser.Parser;
-import Caesar.storage.Storage;
-import Caesar.task.Task;
-import Caesar.task.TaskList;
-import Caesar.ui.Ui;
+import caesar.command.Command;
+import caesar.exception.CaesarException;
+import caesar.parser.Parser;
+import caesar.storage.Storage;
+import caesar.task.Task;
+import caesar.task.TaskList;
+import caesar.ui.Ui;
 
 import java.util.ArrayList;
 
@@ -108,10 +108,8 @@ public class Caesar {
         new Caesar("data/tasks.txt").run();
     }
 
-    /**
-     * Compatibility wrapper that accepts a string path for callers from earlier levels.
-     */
-    static ArrayList<Task> LoadTasksfromFile(String filePath) throws CaesarException {
+    /** Loads tasks from a string path for callers from earlier levels. */
+    static ArrayList<Task> loadTasksFromFile(String filePath) throws CaesarException {
         ArrayList<Task> tasks = new Storage(filePath).load();
         // Reuse TaskList's capacity validation for callers of the old helper.
         new TaskList(tasks);

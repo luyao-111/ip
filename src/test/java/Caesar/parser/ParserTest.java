@@ -1,15 +1,15 @@
-package Caesar.parser;
+package caesar.parser;
 
-import Caesar.Caesar;
-import Caesar.command.AddCommand;
-import Caesar.command.DeleteCommand;
-import Caesar.command.ExitCommand;
-import Caesar.command.ListCommand;
-import Caesar.command.MarkCommand;
-import Caesar.command.UnmarkCommand;
-import Caesar.exception.CaesarException;
-import Caesar.task.Deadline;
-import Caesar.task.Event;
+import caesar.Caesar;
+import caesar.command.AddCommand;
+import caesar.command.DeleteCommand;
+import caesar.command.ExitCommand;
+import caesar.command.ListCommand;
+import caesar.command.MarkCommand;
+import caesar.command.UnmarkCommand;
+import caesar.exception.CaesarException;
+import caesar.task.Deadline;
+import caesar.task.Event;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

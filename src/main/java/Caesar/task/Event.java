@@ -1,4 +1,4 @@
-package Caesar.task;
+package caesar.task;
 
 /**
  * A task with a start and end time.

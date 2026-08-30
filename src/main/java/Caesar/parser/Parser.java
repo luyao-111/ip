@@ -1,18 +1,18 @@
-package Caesar.parser;
+package caesar.parser;
 
-import Caesar.Caesar;
-import Caesar.command.AddCommand;
-import Caesar.command.Command;
-import Caesar.command.DeleteCommand;
-import Caesar.command.ExitCommand;
-import Caesar.command.ListCommand;
-import Caesar.command.MarkCommand;
-import Caesar.command.UnmarkCommand;
-import Caesar.exception.CaesarException;
-import Caesar.task.Deadline;
-import Caesar.task.Event;
-import Caesar.task.Task;
-import Caesar.task.ToDo;
+import caesar.Caesar;
+import caesar.command.AddCommand;
+import caesar.command.Command;
+import caesar.command.DeleteCommand;
+import caesar.command.ExitCommand;
+import caesar.command.ListCommand;
+import caesar.command.MarkCommand;
+import caesar.command.UnmarkCommand;
+import caesar.exception.CaesarException;
+import caesar.task.Deadline;
+import caesar.task.Event;
+import caesar.task.Task;
+import caesar.task.ToDo;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -158,7 +158,9 @@ public class Parser {
 
     /** Creates the standard error for a command that is missing required details. */
     private CaesarException missingDetails(String format) {
-        return new CaesarException("I'd love to organize that for you, but I just need more details. Try enter in this format: " + format);
+        return new CaesarException(
+                "I'd love to organize that for you, but I just need more details. "
+                        + "Try enter in this format: " + format);
     }
 
     /** A parsed command containing its type and the text after the command keyword. */

@@ -1,4 +1,4 @@
-package Caesar.task;
+package caesar.task;
 
 /**
  * A task without a deadline or scheduled time.

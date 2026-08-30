@@ -156,6 +156,7 @@ public class Parser {
                 + "Try these commands: " + COMMANDS);
     }
 
+    /** Creates the standard error for a command that is missing required details. */
     private CaesarException missingDetails(String format) {
         return new CaesarException("I'd love to organize that for you, but I just need more details. Try enter in this format: " + format);
     }

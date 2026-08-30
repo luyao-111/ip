@@ -104,6 +104,7 @@ public class Storage {
         }
     }
 
+    /** Converts a task into the pipe-delimited format stored in the task file. */
     private static String serializeTask(Task task) {
         String status = task.isDone() ? "1" : "0";
         if (task instanceof Deadline deadline) {
@@ -115,6 +116,7 @@ public class Storage {
         return String.join(" | ", "T", status, task.getDescription());
     }
 
+    /** Converts one stored line into a task, reporting malformed fields with its line number. */
     private static Task parseTask(String line, int lineNumber) throws CaesarException {
         String[] parts = line.split("\\|", -1);
         String type = parts.length > 0 ? parts[0].trim() : "";
@@ -147,6 +149,7 @@ public class Storage {
         return task;
     }
 
+    /** Converts the stored completion flag into a boolean value. */
     private static boolean parseStatus(String status, int lineNumber) throws CaesarException {
         if ("1".equals(status)) {
             return true;
@@ -157,6 +160,7 @@ public class Storage {
         throw invalidTaskLine(lineNumber, "status must be 1 or 0");
     }
 
+    /** Validates and trims a required field read from the task file. */
     private static String requireFileField(String value, String fieldName, int lineNumber) throws CaesarException {
         String trimmedValue = value.trim();
         if (trimmedValue.isEmpty()) {
@@ -165,6 +169,7 @@ public class Storage {
         return trimmedValue;
     }
 
+    /** Creates the standard exception for an invalid task-file line. */
     private static CaesarException invalidTaskLine(int lineNumber, String reason) {
         return new CaesarException("Invalid task data on line " + lineNumber + ": " + reason);
     }

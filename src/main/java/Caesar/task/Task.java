@@ -9,10 +9,12 @@ public class Task {
     private final String description;
     private boolean done;
 
+    /** Creates a pending task with the supplied description. */
     public Task(String description) {
         this.description = description;
     }
 
+    /** Marks this task as complete, rejecting an already-complete task. */
     public void markAsDone() throws CaesarException {
         if (done) {
             throw new CaesarException("You have marked this task!");
@@ -20,6 +22,7 @@ public class Task {
         done = true;
     }
 
+    /** Marks this task as pending, rejecting an already-pending task. */
     public void markAsNotDone() throws CaesarException {
         if (!done) {
             throw new CaesarException("You have unmarked this task!");
@@ -27,6 +30,7 @@ public class Task {
         done = false;
     }
 
+    /** Returns whether this task has been marked complete. */
     public boolean isDone() {
         return done;
     }
@@ -38,6 +42,7 @@ public class Task {
         return description;
     }
 
+    /** Returns the task in the standard completion-status display format. */
     @Override
     public String toString() {
         return (done ? "[X] " : "[ ] ") + description;

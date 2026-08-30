@@ -117,6 +117,7 @@ public class TaskList implements Iterable<Task> {
         return List.copyOf(tasks).iterator();
     }
 
+    /** Validates that a one-based task number refers to an existing task. */
     private void validateTaskNumber(int taskNumber) throws CaesarException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new CaesarException(INVALID_TASK_NUMBER);

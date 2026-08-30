@@ -125,6 +125,7 @@ public class Ui implements AutoCloseable {
         showDivider();
     }
 
+    /** Prints encouragement tailored to the current number of tasks. */
     private void showDynamicComment(TaskList tasks) {
         if (tasks.size() < 3) {
             System.out.println("Now you have " + tasks.size() + " tasks in the list.\n"

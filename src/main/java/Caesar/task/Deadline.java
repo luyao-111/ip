@@ -6,6 +6,7 @@ package Caesar.task;
 public class Deadline extends Task {
     private final String by;
 
+    /** Creates a deadline task with its description and deadline text. */
     public Deadline(String description, String by) {
         super(description);
         this.by = by;
@@ -18,6 +19,7 @@ public class Deadline extends Task {
         return by;
     }
 
+    /** Returns the deadline in the task-list display format. */
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by + ")";

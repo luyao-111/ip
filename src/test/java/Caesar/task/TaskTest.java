@@ -1,0 +1,36 @@
+package Caesar.task;
+
+import Caesar.exception.CaesarException;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TaskTest {
+
+    @Test
+    public void testMarkAsNotDoneChangesCompletedTaskToPending() throws CaesarException {
+        Task task = new Task("Task");
+        task.markAsDone();
+
+        task.markAsNotDone();
+
+        assertFalse(task.isDone());
+        assertEquals("[ ] Task", task.toString());
+    }
+
+    @Test
+    public void testMarkAsNotDoneRejectsPendingTask() {
+        Task task = new Task("Task");
+
+        CaesarException exception = assertThrows(
+                CaesarException.class,
+                task::markAsNotDone
+        );
+
+        assertEquals("You have unmarked this task!", exception.getMessage());
+        assertTrue(!task.isDone());
+    }
+}

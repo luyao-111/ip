@@ -66,6 +66,21 @@ public class TaskList implements Iterable<Task> {
         tasks.add(taskNumber - 1, task);
     }
 
+    /** Return tasks including keywords when found. */
+    public TaskList find(String description) throws CaesarException {
+        TaskList foundTasks = new TaskList();
+        for (Task task : tasks) {
+            if (task.getDescription().contains(description)) {
+                foundTasks.add(task);
+            }
+        }
+        if (foundTasks.isEmpty()) {
+            throw new CaesarException("I couldn't find any tasks containing that description. "
+                    + "Try a different keyword or check your spelling.");
+        }
+        return foundTasks;
+    }
+
     /** Returns a task using the one-based number shown to users. */
     public Task get(int taskNumber) throws CaesarException {
         validateTaskNumber(taskNumber);

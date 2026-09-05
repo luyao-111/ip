@@ -6,17 +6,17 @@ import caesar.task.TaskList;
 import caesar.ui.Ui;
 
 public class FindCommand extends Command {
-    private final String task;
+    private final String keyword;
 
-    /** Creates an find command for the supplied task. */
-    public FindCommand(String task) {
-        this.task = task;
+    /** Creates a find command for the supplied keyword. */
+    public FindCommand(String keyword) {
+        this.keyword = keyword;
     }
 
-    /**Finds tasks including key word. */
+    /** Finds tasks including key word. */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws CaesarException {
-        TaskList foundTasks = tasks.find(task);
+        TaskList foundTasks = tasks.find(keyword);
         ui.showTaskFound(foundTasks);
     }
 }

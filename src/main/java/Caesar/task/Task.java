@@ -7,7 +7,7 @@ import caesar.exception.CaesarException;
  */
 public class Task {
     private final String description;
-    private boolean done;
+    private boolean isDone;
 
     /** Creates a pending task with the supplied description. */
     public Task(String description) {
@@ -16,23 +16,23 @@ public class Task {
 
     /** Marks this task as complete, rejecting an already-complete task. */
     public void markAsDone() throws CaesarException {
-        if (done) {
+        if (isDone) {
             throw new CaesarException("You have marked this task!");
         }
-        done = true;
+        isDone = true;
     }
 
     /** Marks this task as pending, rejecting an already-pending task. */
     public void markAsNotDone() throws CaesarException {
-        if (!done) {
+        if (!isDone) {
             throw new CaesarException("You have unmarked this task!");
         }
-        done = false;
+        isDone = false;
     }
 
     /** Returns whether this task has been marked complete. */
     public boolean isDone() {
-        return done;
+        return isDone;
     }
 
     /**
@@ -45,6 +45,6 @@ public class Task {
     /** Returns the task in the standard completion-status display format. */
     @Override
     public String toString() {
-        return (done ? "[X] " : "[ ] ") + description;
+        return (isDone ? "[X] " : "[ ] ") + description;
     }
 }

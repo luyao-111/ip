@@ -82,7 +82,7 @@ public class Parser {
 
         String description = commandParts[0].trim();
         String by = commandParts[1].trim();
-        String formattedBy = convertTime(by);
+        String formattedBy = convertDate(by);
         if (description.isEmpty() || by.isEmpty()) {
             throw missingDetails("deadline <description> /by <date or time>");
         }
@@ -104,8 +104,8 @@ public class Parser {
         String description = commandParts[0].trim();
         String start = timeParts[0].trim();
         String end = timeParts[1].trim();
-        String formattedStart = convertTime(start);
-        String formattedEnd = convertTime(end);
+        String formattedStart = convertDate(start);
+        String formattedEnd = convertDate(end);
         if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
             throw missingDetails("event <description> /from <start> /to <end>");
         }
@@ -113,7 +113,7 @@ public class Parser {
     }
 
     /** Converts a date into the display format used by saved tasks. */
-    private String convertTime(String time) throws CaesarException {
+    private String convertDate(String time) throws CaesarException {
         String trimmed = time.trim();
         LocalDate date;
 

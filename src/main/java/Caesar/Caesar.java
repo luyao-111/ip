@@ -55,8 +55,13 @@ public class Caesar {
 
     /** Creates Caesar with the supplied task-file path. */
     public Caesar(String filePath) {
+        this(filePath, new Ui());
+    }
+
+    /** Creates Caesar with the supplied task-file path and user interface. */
+    public Caesar(String filePath, Ui ui) {
         storage = new Storage(filePath);
-        ui = new Ui();
+        this.ui = ui;
         parser = new Parser();
 
         TaskList loadedTasks;
@@ -72,6 +77,13 @@ public class Caesar {
         tasks = loadedTasks;
         fileWasCreated = createdFile;
         loadingError = loadFailure;
+    }
+
+    /** Processes one command and returns whether the application should exit. */
+    public boolean processCommand(String command) throws CaesarException {
+        Command commandObject = parser.parseCommand(command);
+        commandObject.execute(tasks, ui, storage);
+        return commandObject.isExit();
     }
 
     /** Runs the command loop until the user enters {@code bye} or input ends. */

@@ -1,0 +1,113 @@
+.main-window {
+    -fx-background-color: #fff8eb;
+    -fx-font-family: "Segoe UI";
+}
+
+.header {
+    -fx-background-color: #f8e5c8;
+    -fx-padding: 12 18 10 18;
+    -fx-border-color: transparent transparent #efd4ad transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.app-title {
+    -fx-text-fill: #6c4635;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.app-subtitle {
+    -fx-text-fill: #a16f55;
+    -fx-font-size: 12px;
+}
+
+.conversation-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 10 8 10;
+}
+
+.conversation-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.dialog-container {
+    -fx-background-color: transparent;
+    -fx-padding: 4 2 10 2;
+}
+
+.user-dialog,
+.caesar-dialog {
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 9 12 9 12;
+}
+
+.user-dialog {
+    -fx-background-color: #fff0c7;
+    -fx-border-color: #efd89e;
+}
+
+.caesar-dialog {
+    -fx-background-color: #f8dfc7;
+    -fx-border-color: #e9c2a0;
+}
+
+.user-dialog .label,
+.caesar-dialog .label {
+    -fx-text-fill: #5d4235;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 2px;
+}
+
+.user-dialog .image-view,
+.caesar-dialog .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(111, 72, 50, 0.16), 5, 0.2, 0, 1);
+}
+
+.command-input {
+    -fx-background-color: #fffdf7;
+    -fx-background-radius: 20px;
+    -fx-border-color: #e4c9a6;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+    -fx-prompt-text-fill: #b99b83;
+    -fx-padding: 0 15px;
+    -fx-text-fill: #5d4235;
+}
+
+.command-input:focused {
+    -fx-border-color: #ce9977;
+    -fx-effect: dropshadow(gaussian, rgba(206, 153, 119, 0.25), 6, 0.2, 0, 0);
+}
+
+.send-button {
+    -fx-background-color: #c98e6d;
+    -fx-background-radius: 20px;
+    -fx-text-fill: #fffaf3;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.send-button:hover {
+    -fx-background-color: #b9795a;
+}
+
+.send-button:pressed {
+    -fx-background-color: #a9684d;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #e4c9a6;
+    -fx-background-radius: 8px;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}

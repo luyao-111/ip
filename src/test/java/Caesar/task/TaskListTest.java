@@ -111,4 +111,30 @@ public class TaskListTest {
         assertSame(completed, tasks.get(1));
         assertSame(pending, tasks.get(2));
     }
+
+    /** Verifies that finding tasks preserves matching tasks and their order. */
+    @Test
+    public void testFindReturnsTasksContainingDescription() throws CaesarException {
+        TaskList tasks = new TaskList();
+        ToDo matchingTask = new ToDo("Read a book");
+        tasks.add(matchingTask);
+        tasks.add(new ToDo("Buy groceries"));
+        ToDo secondMatchingTask = new ToDo("book a holiday");
+        tasks.add(secondMatchingTask);
+
+        TaskList foundTasks = tasks.find("book");
+
+        assertEquals(2, foundTasks.size());
+        assertSame(matchingTask, foundTasks.get(1));
+        assertSame(secondMatchingTask, foundTasks.get(2));
+    }
+
+    /** Verifies that finding an absent description reports an error. */
+    @Test
+    public void testFindRejectsDescriptionWithNoMatches() throws CaesarException {
+        TaskList tasks = new TaskList();
+        tasks.add(new ToDo("Read a book"));
+
+        assertThrows(CaesarException.class, () -> tasks.find("exercise"));
+    }
 }

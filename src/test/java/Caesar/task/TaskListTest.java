@@ -111,4 +111,20 @@ public class TaskListTest {
         assertSame(completed, tasks.get(1));
         assertSame(pending, tasks.get(2));
     }
+
+    @Test
+    public void testInsertKeepsTaskAtRequestedOneBasedPosition() throws CaesarException {
+        TaskList tasks = new TaskList();
+        ToDo first = new ToDo("First");
+        ToDo second = new ToDo("Second");
+        ToDo inserted = new ToDo("Inserted");
+        tasks.add(first);
+        tasks.add(second);
+
+        tasks.insert(2, inserted);
+
+        assertSame(first, tasks.get(1));
+        assertSame(inserted, tasks.get(2));
+        assertSame(second, tasks.get(3));
+    }
 }

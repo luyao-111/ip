@@ -4,8 +4,8 @@ package caesar.task;
  * A task with a start and end time.
  */
 public class Event extends Task {
-    private final String start;
-    private final String end;
+    private String start;
+    private String end;
 
     /** Creates an event task with its description, start, and end text. */
     public Event(String description, String start, String end) {
@@ -26,6 +26,12 @@ public class Event extends Task {
      */
     public String getEnd() {
         return end;
+    }
+
+    /** Updates this event to a new start and end date. */
+    public void reschedule(String newStart, String newEnd) {
+        start = newStart;
+        end = newEnd;
     }
 
     /** Returns the event in the task-list display format. */

@@ -1,5 +1,6 @@
 package caesar;
 
+import caesar.exception.CaesarException;
 import caesar.gui.GuiUi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,6 +41,53 @@ public class CaesarTest {
         caesar.processCommand("list");
 
         assertTrue(guiUi.consumeResponse().contains("1. [T][ ] Read a book"));
+    }
+
+    /** Verifies that rescheduling a deadline changes its saved due date. */
+    @Test
+    public void processCommandReschedulesDeadline() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+
+        caesar.processCommand("deadline Submit report /by 2024-06-01");
+        guiUi.clearResponse();
+
+        caesar.processCommand("reschedule 1 05/06/2024");
+
+        assertTrue(guiUi.consumeResponse().contains("Jun 5 2024"));
+        assertEquals("D | 0 | Submit report | Jun 5 2024",
+                java.nio.file.Files.readString(temporaryDirectory.resolve("tasks.txt")).trim());
+    }
+
+    /** Verifies that rescheduling an event changes both its saved dates. */
+    @Test
+    public void processCommandReschedulesEvent() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+
+        caesar.processCommand("event Project meeting /from 2024-06-01 /to 2024-06-02");
+        guiUi.clearResponse();
+
+        caesar.processCommand("reschedule 1 05/05/2026 06/05/2026");
+
+        assertTrue(guiUi.consumeResponse().contains("May 5 2026"));
+        assertEquals("E | 0 | Project meeting | May 5 2026 | Jun 5 2026",
+                java.nio.file.Files.readString(temporaryDirectory.resolve("tasks.txt")).trim());
+    }
+
+    /** Verifies that an undated to-do task cannot be rescheduled. */
+    @Test
+    public void processCommandRejectsReschedulingTodo() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+        caesar.processCommand("todo Read a book");
+
+        CaesarException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                CaesarException.class,
+                () -> caesar.processCommand("reschedule 1 05/06/2024")
+        );
+
+        assertTrue(exception.getMessage().contains("Only deadline and event tasks can be rescheduled"));
     }
 
     /** Verifies that the bye command signals the JavaFX window to stop accepting input. */

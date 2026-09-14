@@ -60,6 +60,12 @@ public class GuiUi extends Ui {
         response.append("I've set this task back to pending:\n").append(task);
     }
 
+    /** Records feedback after rescheduling a deadline or event. */
+    @Override
+    public void showTaskRescheduled(Task task) {
+        response.append("I've rescheduled this task for you:\n").append(task);
+    }
+
     /** Records the current tasks with one-based numbering. */
     @Override
     public void showTaskList(Iterable<Task> tasks) throws CaesarException {

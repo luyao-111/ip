@@ -36,6 +36,7 @@ public class Caesar {
         MARK,
         UNMARK,
         DELETE,
+        RESCHEDULE,
         BYE,
         UNKNOWN;
 

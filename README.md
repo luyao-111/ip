@@ -41,6 +41,7 @@ Caesar is a lightweight, command-line personal assistant chatbot designed to hel
 ### 2. Task Operations
 * **Mark / Unmark:** Mark tasks as done or revert them back to incomplete.
 * **Delete:** Remove unwanted tasks from the list.
+* **Reschedule:** Move a deadline to a new date, or an event to new start and end dates.
 * **List:** View all currently tracked tasks.
 * **Sort:** View tasks organized by status (pending tasks first).
 

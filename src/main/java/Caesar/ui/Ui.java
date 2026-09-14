@@ -109,6 +109,12 @@ public class Ui implements AutoCloseable {
         showDivider();
     }
 
+    /** Prints feedback after rescheduling a deadline or event. */
+    public void showTaskRescheduled(Task task) {
+        System.out.println("No worries, I've rescheduled this task for you:\n" + task);
+        showDivider();
+    }
+
     /** Prints tasks including key words. */
     public void showTaskFound(TaskList foundTasks) throws CaesarException {
         System.out.print("Here are the matching tasks in your list:");

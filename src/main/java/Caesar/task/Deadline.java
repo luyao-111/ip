@@ -4,7 +4,7 @@ package caesar.task;
  * A task that must be completed by a specified date or time.
  */
 public class Deadline extends Task {
-    private final String by;
+    private String by;
 
     /** Creates a deadline task with its description and deadline text. */
     public Deadline(String description, String by) {
@@ -17,6 +17,11 @@ public class Deadline extends Task {
      */
     public String getBy() {
         return by;
+    }
+
+    /** Updates this deadline to a new validated display-date value. */
+    public void reschedule(String newBy) {
+        by = newBy;
     }
 
     /** Returns the deadline in the task-list display format. */

@@ -6,6 +6,7 @@ import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
+import caesar.command.RescheduleCommand;
 import caesar.command.UnmarkCommand;
 import caesar.exception.CaesarException;
 import caesar.task.Deadline;
@@ -32,6 +33,7 @@ public class ParserTest {
         assertTrue(instructions.contains("mark <number>"));
         assertTrue(instructions.contains("unmark <number>"));
         assertTrue(instructions.contains("delete <number>"));
+        assertTrue(instructions.contains("reschedule <number> <date> [<end date>]"));
         assertTrue(instructions.contains("bye"));
     }
 
@@ -81,6 +83,22 @@ public class ParserTest {
         assertInstanceOf(MarkCommand.class, new Parser().parseCommand("mark 1"));
         assertInstanceOf(UnmarkCommand.class, new Parser().parseCommand("unmark 1"));
         assertInstanceOf(DeleteCommand.class, new Parser().parseCommand("delete 1"));
+    }
+
+    @Test
+    public void testParseCommandCreatesRescheduleCommand() throws CaesarException {
+        assertInstanceOf(RescheduleCommand.class,
+                new Parser().parseCommand("reschedule 1 05/06/2024"));
+        assertInstanceOf(RescheduleCommand.class,
+                new Parser().parseCommand("reschedule 1 05/06/2024 06/06/2024"));
+    }
+
+    @Test
+    public void testParseCommandRejectsRescheduleWithoutDate() {
+        assertThrows(
+                CaesarException.class,
+                () -> new Parser().parseCommand("reschedule 1")
+        );
     }
 
     @Test
@@ -148,7 +166,7 @@ public class ParserTest {
         );
 
         assertEquals(
-                "Invalid date format. Please use YYYY-MM-DD or MMM d yyyy.",
+                "Invalid date format. Please use YYYY-MM-DD, DD/MM/YYYY, or MMM d yyyy.",
                 exception.getMessage()
         );
     }

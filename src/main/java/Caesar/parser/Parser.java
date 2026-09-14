@@ -7,6 +7,7 @@ import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
+import caesar.command.RescheduleCommand;
 import caesar.command.UnmarkCommand;
 import caesar.exception.CaesarException;
 import caesar.task.Deadline;
@@ -29,9 +30,11 @@ import java.util.Locale;
 public class Parser {
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter SLASH_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
             + "event <description> /from <start> /to <end>, list, mark <number>, "
-            + "unmark <number>, delete <number>, or bye";
+            + "unmark <number>, delete <number>, reschedule <number> <date> [<end date>], or bye";
 
     /** Returns the command instructions shown by the user interface. */
     public static String getCommandInstructions() {
@@ -63,6 +66,8 @@ public class Parser {
             case MARK -> new MarkCommand(parseTaskNumber(details, "mark <task number>"));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(details, "unmark <task number>"));
             case DELETE -> new DeleteCommand(parseTaskNumber(details, "delete <task number>"));
+            case RESCHEDULE -> createReschedule(requireDetails(
+                    details, "reschedule <number> <date> [<end date>]"));
             case BYE -> {
                 if (details != null) {
                     throw unknownCommand();
@@ -112,6 +117,21 @@ public class Parser {
         return new Event(description, formattedStart, formattedEnd);
     }
 
+    /** Creates a reschedule command from one or two positional dates. */
+    private Command createReschedule(String details) throws CaesarException {
+        String[] commandParts = details.trim().split("\\s+");
+        if (commandParts.length < 2 || commandParts.length > 3) {
+            throw missingDetails("reschedule <number> <date> [<end date>]");
+        }
+
+        int taskNumber = parseTaskNumber(commandParts[0], "reschedule <number> <date> [<end date>]");
+        String newStart = convertDate(commandParts[1]);
+        if (commandParts.length == 2) {
+            return new RescheduleCommand(taskNumber, newStart);
+        }
+        return new RescheduleCommand(taskNumber, newStart, convertDate(commandParts[2]));
+    }
+
     /** Converts a date into the display format used by saved tasks. */
     private String convertDate(String time) throws CaesarException {
         String trimmed = time.trim();
@@ -121,9 +141,14 @@ public class Parser {
             date = LocalDate.parse(trimmed);
         } catch (DateTimeParseException firstException) {
             try {
-                date = LocalDate.parse(trimmed, DISPLAY_FORMAT);
+                date = LocalDate.parse(trimmed, SLASH_DATE_FORMAT);
             } catch (DateTimeParseException secondException) {
-                throw new CaesarException("Invalid date format. Please use YYYY-MM-DD or MMM d yyyy.");
+                try {
+                    date = LocalDate.parse(trimmed, DISPLAY_FORMAT);
+                } catch (DateTimeParseException thirdException) {
+                    throw new CaesarException(
+                            "Invalid date format. Please use YYYY-MM-DD, DD/MM/YYYY, or MMM d yyyy.");
+                }
             }
         }
         return date.format(DISPLAY_FORMAT);

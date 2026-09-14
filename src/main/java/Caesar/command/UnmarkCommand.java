@@ -21,10 +21,14 @@ public class UnmarkCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws CaesarException {
         Task task = tasks.get(taskNumber);
         tasks.unmark(taskNumber);
+        // A successful unmark operation must leave the selected task pending.
+        assert !task.isDone() : "A successfully unmarked task must be pending";
         try {
             storage.save(tasks);
         } catch (CaesarException exception) {
             task.markAsDone();
+            // A failed save must restore the task's completed status.
+            assert task.isDone() : "A failed unmark must restore the completed status";
             throw exception;
         }
         ui.showTaskUnmarked(task);

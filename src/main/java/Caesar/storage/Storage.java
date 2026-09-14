@@ -129,6 +129,8 @@ public class Storage {
         if (parts.length != expectedParts) {
             throw invalidTaskLine(lineNumber, "expected " + expectedParts + " fields but found " + parts.length);
         }
+        // The format-specific field count check must hold before fields are read.
+        assert parts.length == expectedParts : "A parsed task must have its expected number of fields";
 
         boolean isDone = parseStatus(parts[1].trim(), lineNumber);
         String description = requireFileField(parts[2], "description", lineNumber);
@@ -145,6 +147,11 @@ public class Storage {
 
         if (isDone) {
             task.markAsDone();
+            // A stored completion flag of 1 must produce a completed task.
+            assert task.isDone() : "A task loaded with status 1 must be complete";
+        } else {
+            // A newly created task loaded with status 0 must remain pending.
+            assert !task.isDone() : "A task loaded with status 0 must be pending";
         }
         return task;
     }

@@ -21,10 +21,14 @@ public class MarkCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws CaesarException {
         Task task = tasks.get(taskNumber);
         tasks.mark(taskNumber);
+        // A successful mark operation must leave the selected task complete.
+        assert task.isDone() : "A successfully marked task must be complete";
         try {
             storage.save(tasks);
         } catch (CaesarException exception) {
             task.markAsNotDone();
+            // A failed save must restore the task's status before the command.
+            assert !task.isDone() : "A failed mark must restore the pending status";
             throw exception;
         }
         ui.showTaskMarked(task);

@@ -20,6 +20,8 @@ public class Task {
             throw new CaesarException("You have marked this task!");
         }
         isDone = true;
+        // A successful completion transition must leave the task marked done.
+        assert isDone : "A completed task must be marked done";
     }
 
     /** Marks this task as pending, rejecting an already-pending task. */
@@ -28,6 +30,8 @@ public class Task {
             throw new CaesarException("You have unmarked this task!");
         }
         isDone = false;
+        // A successful reset transition must leave the task pending.
+        assert !isDone : "A reset task must be pending";
     }
 
     /** Returns whether this task has been marked complete. */

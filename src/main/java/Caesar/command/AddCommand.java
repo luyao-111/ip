@@ -19,11 +19,16 @@ public class AddCommand extends Command {
     /** Adds the task, rolls back on a save failure, and reports success. */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws CaesarException {
+        int originalSize = tasks.size();
         tasks.add(task);
+        // Adding a task must append exactly one item to the list.
+        assert tasks.size() == originalSize + 1 : "Adding a task must increase the list size by one";
         try {
             storage.save(tasks);
         } catch (CaesarException exception) {
             tasks.delete(tasks.size());
+            // A failed save must restore the list to its pre-command state.
+            assert tasks.size() == originalSize : "A failed add must restore the original list size";
             throw exception;
         }
         ui.showTaskAdded(task, tasks);

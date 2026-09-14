@@ -70,19 +70,16 @@ public class TaskList implements Iterable<Task> {
         assert tasks.get(taskNumber - 1) == task : "Inserted task must occupy the requested position";
     }
 
-    /** Return tasks including keywords when found. */
+    /** Returns tasks whose descriptions contain the supplied text. */
     public TaskList find(String description) throws CaesarException {
-        TaskList foundTasks = new TaskList();
-        for (Task task : tasks) {
-            if (task.getDescription().contains(description)) {
-                foundTasks.add(task);
-            }
-        }
-        if (foundTasks.isEmpty()) {
+        List<Task> matchingTasks = tasks.stream()
+                .filter(task -> task.getDescription().contains(description))
+                .toList();
+        if (matchingTasks.isEmpty()) {
             throw new CaesarException("I couldn't find any tasks containing that description. "
                     + "Try a different keyword or check your spelling.");
         }
-        return foundTasks;
+        return new TaskList(matchingTasks);
     }
 
     /** Returns a task using the one-based number shown to users. */

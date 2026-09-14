@@ -7,8 +7,9 @@ import caesar.task.Task;
 import caesar.task.TaskList;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.StreamSupport;
 
 /**
  * Handles Caesar's console input and user-facing output.
@@ -118,10 +119,7 @@ public class Ui implements AutoCloseable {
 
     /** Prints tasks with one-based numbering and completion feedback. */
     public void showTaskList(Iterable<Task> tasks) throws CaesarException {
-        ArrayList<Task> taskItems = new ArrayList<>();
-        for (Task task : tasks) {
-            taskItems.add(task);
-        }
+        List<Task> taskItems = StreamSupport.stream(tasks.spliterator(), false).toList();
         if (taskItems.isEmpty()) {
             throw new CaesarException(
                     "Your schedule is completely clear right now. "

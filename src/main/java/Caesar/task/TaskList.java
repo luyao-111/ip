@@ -47,6 +47,8 @@ public class TaskList implements Iterable<Task> {
             throw new CaesarException("You have too many tasks undone. Please finish some first before adding more");
         }
         tasks.add(task);
+        // The capacity check above must protect the list's maximum-size invariant.
+        assert tasks.size() <= MAX_TASKS : "Task list must not exceed its maximum capacity";
     }
 
     /** Removes and returns a task using the one-based number shown to users. */
@@ -64,6 +66,8 @@ public class TaskList implements Iterable<Task> {
             throw new CaesarException(INVALID_TASK_NUMBER);
         }
         tasks.add(taskNumber - 1, task);
+        // Insertion must preserve the one-based position shown to users.
+        assert tasks.get(taskNumber - 1) == task : "Inserted task must occupy the requested position";
     }
 
     /** Returns tasks whose descriptions contain the supplied text. */
@@ -86,18 +90,29 @@ public class TaskList implements Iterable<Task> {
 
     /** Marks a task as done using the one-based number shown to users. */
     public void mark(int taskNumber) throws CaesarException {
-        get(taskNumber).markAsDone();
+        Task task = get(taskNumber);
+        task.markAsDone();
+        // Returning normally means the selected task is now complete.
+        assert task.isDone() : "A successfully marked task must be complete";
     }
 
     /** Marks a task as not done using the one-based number shown to users. */
     public void unmark(int taskNumber) throws CaesarException {
-        get(taskNumber).markAsNotDone();
+        Task task = get(taskNumber);
+        task.markAsNotDone();
+        // Returning normally means the selected task is now pending.
+        assert !task.isDone() : "A successfully unmarked task must be pending";
     }
 
     /** Returns a copy sorted with pending tasks before completed tasks. */
     public ArrayList<Task> sortedByStatus() {
         ArrayList<Task> sortedTasks = new ArrayList<>(tasks);
         sortedTasks.sort(Comparator.comparing(Task::isDone));
+        // Every completed task must appear after all pending tasks.
+        for (int i = 1; i < sortedTasks.size(); i++) {
+            assert !sortedTasks.get(i - 1).isDone() || sortedTasks.get(i).isDone()
+                    : "Status-sorted tasks must place pending tasks first";
+        }
         return sortedTasks;
     }
 

@@ -11,6 +11,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TaskTest {
 
     @Test
+    public void testMarkAsDoneChangesPendingTaskToCompleted() throws CaesarException {
+        Task task = new Task("Task");
+
+        task.markAsDone();
+
+        assertTrue(task.isDone());
+        assertEquals("[X] Task", task.toString());
+    }
+
+    @Test
     public void testMarkAsNotDoneChangesCompletedTaskToPending() throws CaesarException {
         Task task = new Task("Task");
         task.markAsDone();

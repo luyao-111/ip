@@ -25,16 +25,25 @@
     -fx-background-color: transparent;
     -fx-background: transparent;
     -fx-border-color: transparent;
-    -fx-padding: 8 10 8 10;
+    -fx-padding: 10 12 10 12;
 }
 
 .conversation-scroll > .viewport {
     -fx-background-color: transparent;
 }
 
+.help-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.help-scroll > .viewport {
+    -fx-background-color: #fff8eb;
+}
+
 .dialog-container {
     -fx-background-color: transparent;
-    -fx-padding: 4 2 10 2;
+    -fx-padding: 8 4 16 4;
 }
 
 .user-dialog,
@@ -42,7 +51,7 @@
     -fx-background-radius: 18px;
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
-    -fx-padding: 9 12 9 12;
+    -fx-padding: 11 14 11 14;
 }
 
 .user-dialog {
@@ -59,7 +68,7 @@
 .caesar-dialog .label {
     -fx-text-fill: #5d4235;
     -fx-font-size: 14px;
-    -fx-line-spacing: 2px;
+    -fx-line-spacing: 3px;
 }
 
 .user-dialog .image-view,
@@ -97,6 +106,34 @@
 
 .send-button:pressed {
     -fx-background-color: #a9684d;
+}
+
+.help-button {
+    -fx-background-color: #ead0b2;
+    -fx-background-radius: 20px;
+    -fx-text-fill: #6c4635;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.help-button:hover {
+    -fx-background-color: #dfbd98;
+}
+
+.help-content {
+    -fx-background-color: #fff8eb;
+}
+
+.help-title {
+    -fx-text-fill: #6c4635;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.help-command {
+    -fx-text-fill: #5d4235;
+    -fx-font-size: 13px;
+    -fx-padding: 2 0 2 0;
 }
 
 .scroll-bar:vertical {

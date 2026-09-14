@@ -4,6 +4,8 @@ import caesar.Caesar;
 import caesar.command.AddCommand;
 import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
+import caesar.command.FindCommand;
+import caesar.command.HelpCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
 import caesar.command.RescheduleCommand;
@@ -24,17 +26,10 @@ public class ParserTest {
 
     @Test
     public void testCommandInstructionsContainSupportedCommands() {
-        String instructions = Parser.getCommandInstructions();
-
-        assertTrue(instructions.contains("todo <description>"));
-        assertTrue(instructions.contains("deadline <description> /by <date>"));
-        assertTrue(instructions.contains("event <description> /from <start> /to <end>"));
-        assertTrue(instructions.contains("list"));
-        assertTrue(instructions.contains("mark <number>"));
-        assertTrue(instructions.contains("unmark <number>"));
-        assertTrue(instructions.contains("delete <number>"));
-        assertTrue(instructions.contains("reschedule <number> <date> [<end date>]"));
-        assertTrue(instructions.contains("bye"));
+        assertEquals("Type a command or click HELP to see available formats.",
+                Parser.getCommandInstructions());
+        assertTrue(Parser.getHelpCommands().contains("find <keyword>"));
+        assertTrue(Parser.getHelpCommands().contains("help"));
     }
 
     @Test
@@ -79,6 +74,17 @@ public class ParserTest {
     }
 
     @Test
+    public void testParseCommandCreatesFindCommand() throws CaesarException {
+        assertInstanceOf(FindCommand.class,
+                new Parser().parseCommand("find report"));
+    }
+
+    @Test
+    public void testParseCommandCreatesHelpCommand() throws CaesarException {
+        assertInstanceOf(HelpCommand.class, new Parser().parseCommand("HELP"));
+    }
+
+    @Test
     public void testParseCommandCreatesStatusAndDeleteCommands() throws CaesarException {
         assertInstanceOf(MarkCommand.class, new Parser().parseCommand("mark 1"));
         assertInstanceOf(UnmarkCommand.class, new Parser().parseCommand("unmark 1"));
@@ -115,8 +121,7 @@ public class ParserTest {
         );
 
         assertEquals(
-                "I'm not quite sure I caught that command, but take your time. Let's try again. "
-                        + "Try these commands: " + Parser.getCommandInstructions(),
+                "I'm not quite sure I caught that command. :(click HELP to find useful commands)",
                 exception.getMessage()
         );
     }

@@ -5,8 +5,6 @@ import caesar.task.Task;
 import caesar.task.TaskList;
 import caesar.ui.Ui;
 
-import java.util.ArrayList;
-
 /** Collects command responses for display in the JavaFX conversation window. */
 public class GuiUi extends Ui {
     private final StringBuilder response = new StringBuilder();
@@ -31,62 +29,54 @@ public class GuiUi extends Ui {
     /** Records feedback after adding a task. */
     @Override
     public void showTaskAdded(Task task, TaskList tasks) {
-        response.append("Got it. I've safely recorded this for you:\n")
-                .append(task)
-                .append("\nNow you have ")
-                .append(tasks.size())
-                .append(" tasks in the list.");
+        response.append(formatTaskAddedResponse(task, tasks));
     }
 
     /** Records feedback after deleting a task. */
     @Override
     public void showTaskDeleted(Task task, TaskList tasks) {
-        response.append("Noted. I've removed this task:\n")
-                .append(task)
-                .append("\nNow you have ")
-                .append(tasks.size())
-                .append(" tasks in the list.");
+        response.append(formatTaskDeletedResponse(task, tasks));
     }
 
     /** Records feedback after marking a task complete. */
     @Override
     public void showTaskMarked(Task task) {
-        response.append("Well done. I've marked this as complete:\n").append(task);
+        response.append(formatTaskMarkedResponse(task));
     }
 
     /** Records feedback after returning a task to pending. */
     @Override
     public void showTaskUnmarked(Task task) {
-        response.append("I've set this task back to pending:\n").append(task);
+        response.append(formatTaskUnmarkedResponse(task));
     }
 
     /** Records feedback after rescheduling a deadline or event. */
     @Override
     public void showTaskRescheduled(Task task) {
-        response.append("I've rescheduled this task for you:\n").append(task);
+        response.append(formatTaskRescheduledResponse(task));
+    }
+
+    /** Records matching tasks for display in the JavaFX conversation window. */
+    @Override
+    public void showTaskFound(TaskList foundTasks) throws CaesarException {
+        response.append(formatTaskFoundResponse(foundTasks));
+    }
+
+    /** Records the available command formats for the JavaFX conversation window. */
+    @Override
+    public void showHelp() {
+        response.append(formatHelpResponse());
     }
 
     /** Records the current tasks with one-based numbering. */
     @Override
     public void showTaskList(Iterable<Task> tasks) throws CaesarException {
-        ArrayList<Task> taskItems = new ArrayList<>();
-        for (Task task : tasks) {
-            taskItems.add(task);
-        }
-
-        if (taskItems.isEmpty()) {
-            throw new CaesarException("Your task list is empty right now.");
-        }
-
-        response.append("Here are the tasks in your list:\n\n");
-        for (int i = 0; i < taskItems.size(); i++) {
-            response.append(i + 1).append(". ").append(taskItems.get(i)).append("\n");
-        }
+        response.append(formatTaskListResponse(tasks));
     }
 
     /** Records the farewell message. */
     @Override
     public void showGoodbye() {
-        response.append("You handled today wonderfully. Until next time!");
+        response.append(formatGoodbyeResponse());
     }
 }

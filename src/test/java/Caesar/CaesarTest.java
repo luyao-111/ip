@@ -43,6 +43,33 @@ public class CaesarTest {
         assertTrue(guiUi.consumeResponse().contains("1. [T][ ] Read a book"));
     }
 
+    /** Verifies that find returns matching tasks through the GUI response collector. */
+    @Test
+    public void processCommandFindsTasks() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+        caesar.processCommand("todo Read a book");
+        caesar.processCommand("todo Buy groceries");
+        guiUi.clearResponse();
+
+        caesar.processCommand("find book");
+
+        assertTrue(guiUi.consumeResponse().contains("1. [T][ ] Read a book"));
+    }
+
+    /** Verifies that typing help produces the command list in the GUI response. */
+    @Test
+    public void processCommandShowsHelp() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+
+        caesar.processCommand("HELP");
+
+        String response = guiUi.consumeResponse();
+        assertTrue(response.contains("find <keyword>"));
+        assertTrue(response.contains("reschedule <number> <date> [<end date>]"));
+    }
+
     /** Verifies that rescheduling a deadline changes its saved due date. */
     @Test
     public void processCommandReschedulesDeadline() throws Exception {

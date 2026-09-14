@@ -79,52 +79,111 @@ public class Ui implements AutoCloseable {
 
     /** Prints the farewell message. */
     public void showGoodbye() {
-        System.out.println("You handled today wonderfully. \nUntil next time—I'm always in your corner.");
+        System.out.println(formatGoodbyeResponse());
         showDivider();
+    }
+
+    /** Formats the farewell message shared by console and GUI interfaces. */
+    protected String formatGoodbyeResponse() {
+        return "You handled today wonderfully. \nUntil next time\u2014I'm always in your corner.";
     }
 
     /** Prints feedback after adding a task and the dynamic task-count comment. */
     public void showTaskAdded(Task task, TaskList tasks) {
-        System.out.println("Got it. I've safely recorded this for you:\n" + task);
-        showDynamicComment(tasks);
+        System.out.println(formatTaskAddedResponse(task, tasks));
+        showDivider();
     }
 
     /** Prints feedback after deleting a task. */
     public void showTaskDeleted(Task task, TaskList tasks) {
-        System.out.println("Noted. I've removed this task:\n" + task
-                + "\nNow you have " + tasks.size() + " tasks in the list.\n"
-                + "I'm glad that you got some of your own time");
+        System.out.println(formatTaskDeletedResponse(task, tasks));
         showDivider();
     }
 
     /** Prints feedback after marking a task complete. */
     public void showTaskMarked(Task task) {
-        System.out.println("Well done, proud of your progress. I've marked this as complete:\n" + task);
+        System.out.println(formatTaskMarkedResponse(task));
         showDivider();
     }
 
     /** Prints feedback after returning a task to pending. */
     public void showTaskUnmarked(Task task) {
-        System.out.println("No worries at all, no need to rush. I've set this back to pending:\n" + task);
+        System.out.println(formatTaskUnmarkedResponse(task));
         showDivider();
     }
 
     /** Prints feedback after rescheduling a deadline or event. */
     public void showTaskRescheduled(Task task) {
-        System.out.println("No worries, I've rescheduled this task for you:\n" + task);
+        System.out.println(formatTaskRescheduledResponse(task));
         showDivider();
+    }
+
+    /** Formats the response shown after adding a task. */
+    protected String formatTaskAddedResponse(Task task, TaskList tasks) {
+        return "Got it. I've safely recorded this for you:\n" + task
+                + "\n" + formatDynamicComment(tasks);
+    }
+
+    /** Formats the response shown after deleting a task. */
+    protected String formatTaskDeletedResponse(Task task, TaskList tasks) {
+        return "Noted. I've removed this task:\n" + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.\n"
+                + "I'm glad that you got some of your own time";
+    }
+
+    /** Formats the response shown after marking a task complete. */
+    protected String formatTaskMarkedResponse(Task task) {
+        return "Well done, proud of your progress. I've marked this as complete:\n" + task;
+    }
+
+    /** Formats the response shown after returning a task to pending. */
+    protected String formatTaskUnmarkedResponse(Task task) {
+        return "No worries at all, no need to rush. I've set this back to pending:\n" + task;
+    }
+
+    /** Formats the response shown after rescheduling a task. */
+    protected String formatTaskRescheduledResponse(Task task) {
+        return "No worries, I've rescheduled this task for you:\n" + task;
     }
 
     /** Prints tasks including key words. */
     public void showTaskFound(TaskList foundTasks) throws CaesarException {
-        System.out.print("Here are the matching tasks in your list:");
+        System.out.println(formatTaskFoundResponse(foundTasks));
+        showDivider();
+    }
+
+    /** Formats matching tasks with one-based numbering. */
+    protected String formatTaskFoundResponse(TaskList foundTasks) throws CaesarException {
+        StringBuilder response = new StringBuilder("Here are the matching tasks in your list:\n");
         for (int i = 0; i < foundTasks.size(); i++) {
-            System.out.println((i + 1) + "." + foundTasks.get(i));
+            response.append(i + 1).append(". ").append(foundTasks.get(i)).append("\n");
         }
+        return response.toString();
+    }
+
+    /** Prints the available command formats. */
+    public void showHelp() {
+        System.out.println(formatHelpResponse());
+        showDivider();
+    }
+
+    /** Formats the available command formats for console and GUI interfaces. */
+    protected String formatHelpResponse() {
+        StringBuilder response = new StringBuilder("Available commands:\n");
+        for (String command : Parser.getHelpCommands()) {
+            response.append("• ").append(command).append("\n");
+        }
+        return response.toString();
     }
 
     /** Prints tasks with one-based numbering and completion feedback. */
     public void showTaskList(Iterable<Task> tasks) throws CaesarException {
+        System.out.println(formatTaskListResponse(tasks));
+        showDivider();
+    }
+
+    /** Formats a task list with one-based numbering and completion feedback. */
+    protected String formatTaskListResponse(Iterable<Task> tasks) throws CaesarException {
         List<Task> taskItems = StreamSupport.stream(tasks.spliterator(), false).toList();
         if (taskItems.isEmpty()) {
             throw new CaesarException(
@@ -132,33 +191,33 @@ public class Ui implements AutoCloseable {
                             + "Take this time to relax and recharge");
         }
 
-        System.out.println("Here are the tasks in your list:\n");
+        StringBuilder response = new StringBuilder("Here are the tasks in your list:\n\n");
         for (int i = 0; i < taskItems.size(); i++) {
-            System.out.println((i + 1) + "." + taskItems.get(i));
+            response.append(i + 1).append(". ").append(taskItems.get(i)).append("\n");
         }
 
         if (taskItems.stream().allMatch(Task::isDone)) {
-            System.out.println("\nCongrats! You have completed all your tasks!");
+            response.append("\nCongrats! You have completed all your tasks!");
         }
-        showDivider();
+        return response.toString();
     }
 
-    /** Prints encouragement tailored to the current number of tasks. */
-    private void showDynamicComment(TaskList tasks) {
+    /** Formats encouragement tailored to the current number of tasks. */
+    protected String formatDynamicComment(TaskList tasks) {
         if (tasks.size() < 3) {
-            System.out.println("Now you have " + tasks.size() + " tasks in the list.\n"
+            return "Now you have " + tasks.size() + " tasks in the list.\n"
                     + "Here is what we have lined up: \n" + tasks
-                    + " \nA light and manageable day ahead—you've got this effortlessly.");
+                    + " \nA light and manageable day ahead\u2014you've got this effortlessly.";
         } else if (tasks.size() < 7) {
-            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.\n"
+            return "\nNow you have " + tasks.size() + " tasks in the list.\n"
                     + "Here is your schedule for today: \n" + tasks
-                    + "\nSteady pace, one thing at a time—I'm right beside you:");
+                    + "\nSteady pace, one thing at a time\u2014I'm right beside you:";
         } else {
-            System.out.println("\nNow you have " + tasks.size() + " tasks in the list.\n"
+            return "\nNow you have " + tasks.size() + " tasks in the list.\n"
                     + "You have a full plate today: \n" + tasks
-                    + "\nRemember to take breaks and stay hydrated—let's tackle them together step by step!");
+                    + "\nRemember to take breaks and stay hydrated\u2014"
+                    + "let's tackle them together step by step!";
         }
-        showDivider();
     }
 
     /** Closes the standard-input scanner. */

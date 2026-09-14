@@ -47,6 +47,15 @@
                 styleClass="send-button"
                 AnchorPane.bottomAnchor="1.0"
                 AnchorPane.rightAnchor="1.0" />
+        <Button fx:id="helpButton"
+                mnemonicParsing="false"
+                onAction="#handleHelp"
+                prefHeight="30.0"
+                prefWidth="64.0"
+                text="HELP"
+                styleClass="help-button"
+                AnchorPane.rightAnchor="14.0"
+                AnchorPane.topAnchor="12.0" />
         <ScrollPane fx:id="scrollPane"
                     fitToWidth="true"
                     hbarPolicy="NEVER"
@@ -60,10 +69,8 @@
                     AnchorPane.topAnchor="62.0">
             <content>
                 <VBox fx:id="dialogContainer"
-                      prefHeight="552.0"
-                      prefWidth="388.0"
                       styleClass="dialog-container"
-                      spacing="10.0" />
+                      spacing="14.0" />
             </content>
         </ScrollPane>
     </children>

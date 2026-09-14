@@ -5,7 +5,9 @@ import caesar.storage.Storage;
 import caesar.task.TaskList;
 import caesar.ui.Ui;
 
+/** Finds tasks whose descriptions contain a supplied keyword. */
 public class FindCommand extends Command {
+    /** Keyword used to match task descriptions. */
     private final String keyword;
 
     /** Creates a find command for the supplied keyword. */

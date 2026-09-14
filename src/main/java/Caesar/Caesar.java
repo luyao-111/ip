@@ -33,6 +33,8 @@ public class Caesar {
         DEADLINE,
         EVENT,
         LIST,
+        FIND,
+        HELP,
         MARK,
         UNMARK,
         DELETE,

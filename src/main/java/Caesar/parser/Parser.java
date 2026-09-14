@@ -5,6 +5,8 @@ import caesar.command.AddCommand;
 import caesar.command.Command;
 import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
+import caesar.command.FindCommand;
+import caesar.command.HelpCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
 import caesar.command.RescheduleCommand;
@@ -18,6 +20,7 @@ import caesar.task.ToDo;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -32,13 +35,30 @@ public class Parser {
             DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
     private static final DateTimeFormatter SLASH_DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String COMMANDS = "todo <description>, deadline <description> /by <date>, "
-            + "event <description> /from <start> /to <end>, list, mark <number>, "
-            + "unmark <number>, delete <number>, reschedule <number> <date> [<end date>], or bye";
+    private static final String COMMAND_INSTRUCTIONS =
+            "Type a command or click HELP to see available formats.";
 
     /** Returns the command instructions shown by the user interface. */
     public static String getCommandInstructions() {
-        return COMMANDS;
+        return COMMAND_INSTRUCTIONS;
+    }
+
+    /** Returns every command format displayed by the GUI help window. */
+    public static List<String> getHelpCommands() {
+        return List.of(
+                "todo <description>",
+                "deadline <description> /by <date>",
+                "event <description> /from <start> /to <end>",
+                "list",
+                "list sorted",
+                "find <keyword>",
+                "help",
+                "mark <task number>",
+                "unmark <task number>",
+                "delete <task number>",
+                "reschedule <number> <date> [<end date>]",
+                "bye"
+        );
     }
 
     /** Splits raw input into a command type and its optional details. */
@@ -63,6 +83,8 @@ public class Parser {
             case EVENT -> new AddCommand(createEvent(requireDetails(
                     details, "event <description> /from <start> /to <end>")));
             case LIST -> new ListCommand("sorted".equals(details));
+            case FIND -> new FindCommand(requireDetails(details, "find <keyword>"));
+            case HELP -> new HelpCommand();
             case MARK -> new MarkCommand(parseTaskNumber(details, "mark <task number>"));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(details, "unmark <task number>"));
             case DELETE -> new DeleteCommand(parseTaskNumber(details, "delete <task number>"));
@@ -177,15 +199,15 @@ public class Parser {
 
     /** Creates the standard invalid-command error. */
     public CaesarException unknownCommand() {
-        return new CaesarException("I'm not quite sure I caught that command, but take your time. Let's try again. "
-                + "Try these commands: " + COMMANDS);
+        return new CaesarException("I'm not quite sure I caught that command. "
+                + ":(click HELP to find useful commands)");
     }
 
     /** Creates the standard error for a command that is missing required details. */
     private CaesarException missingDetails(String format) {
         return new CaesarException(
                 "I'd love to organize that for you, but I just need more details. "
-                        + "Try enter in this format: " + format);
+                        + "Try enter in this format: \n\n" + format);
     }
 
     /** A parsed command containing its type and the text after the command keyword. */

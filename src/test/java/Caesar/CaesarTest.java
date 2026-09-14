@@ -4,6 +4,9 @@ import caesar.gui.GuiUi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,6 +49,26 @@ public class CaesarTest {
 
         assertTrue(caesar.processCommand("bye"));
         assertTrue(guiUi.consumeResponse().contains("Until next time"));
+    }
+
+    /** Verifies that the interactive loop executes commands through the shared command path. */
+    @Test
+    public void runProcessesCommandsAndStopsAtExit() {
+        InputStream originalInput = System.in;
+        System.setIn(new ByteArrayInputStream(
+                "todo Read a book\nbye\n".getBytes(StandardCharsets.UTF_8)));
+
+        try {
+            GuiUi guiUi = new GuiUi();
+            Caesar caesar = createCaesar(guiUi);
+            caesar.run();
+
+            String response = guiUi.consumeResponse();
+            assertTrue(response.contains("Read a book"));
+            assertTrue(response.contains("Until next time"));
+        } finally {
+            System.setIn(originalInput);
+        }
     }
 
     /** Creates a Caesar instance backed by an isolated temporary task file. */

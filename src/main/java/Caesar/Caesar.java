@@ -101,9 +101,7 @@ public class Caesar {
                 ui.showDivider();
 
                 try {
-                    Command commandObject = parser.parseCommand(command);
-                    commandObject.execute(tasks, ui, storage);
-                    if (commandObject.isExit()) {
+                    if (processCommand(command)) {
                         return;
                     }
                 } catch (CaesarException exception) {

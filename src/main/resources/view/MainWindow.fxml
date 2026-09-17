@@ -7,8 +7,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity"
+<AnchorPane maxHeight="1.7976931348623157E308"
+            maxWidth="1.7976931348623157E308"
+            minHeight="450.0" minWidth="360.0"
             prefHeight="600.0" prefWidth="400.0"
             styleClass="main-window"
             stylesheets="@caesar.css"
@@ -73,5 +74,11 @@
                       spacing="14.0" />
             </content>
         </ScrollPane>
+        <Label fx:id="commandPreview"
+               managed="false"
+               visible="false"
+               styleClass="command-preview"
+               AnchorPane.bottomAnchor="45.0"
+               AnchorPane.leftAnchor="14.0" />
     </children>
 </AnchorPane>

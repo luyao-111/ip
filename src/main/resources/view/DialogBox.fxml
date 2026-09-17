@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <fx:root alignment="TOP_RIGHT"
          maxHeight="1.7976931348623157E308"
@@ -14,10 +15,20 @@
          xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Label fx:id="dialog"
-               minHeight="-Infinity"
-               text="Label"
-               wrapText="true" />
+        <VBox maxWidth="1.7976931348623157E308"
+              spacing="4.0"
+              HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="dialog"
+                       maxWidth="1.7976931348623157E308"
+                       text="Label"
+                       wrapText="true" />
+                <Label fx:id="commandBadge"
+                       managed="false"
+                       visible="false"
+                       styleClass="command-badge" />
+            </children>
+        </VBox>
         <ImageView fx:id="displayPicture"
                    fitHeight="46.0"
                    fitWidth="46.0"

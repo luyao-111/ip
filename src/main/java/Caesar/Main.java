@@ -1,14 +1,14 @@
 package caesar;
 
+import java.io.IOException;
+
 import caesar.gui.GuiUi;
 import caesar.gui.MainWindow;
-import javafx.fxml.FXMLLoader;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 /** Starts the JavaFX user interface for Caesar. */
 public class Main extends Application {
@@ -22,7 +22,7 @@ public class Main extends Application {
                     new Caesar("data/tasks.txt", guiUi), guiUi);
 
             stage.setTitle("Caesar");
-            stage.setResizable(false);
+            stage.setResizable(true);
             stage.setScene(new Scene(mainWindow));
             stage.show();
         } catch (IOException exception) {

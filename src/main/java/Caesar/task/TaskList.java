@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Stores the tasks managed by Caesar and exposes task-list operations.
@@ -72,8 +73,9 @@ public class TaskList implements Iterable<Task> {
 
     /** Returns tasks whose descriptions contain the supplied text. */
     public TaskList find(String description) throws CaesarException {
+        String searchTerm = description.trim().toLowerCase(Locale.ENGLISH);
         List<Task> matchingTasks = tasks.stream()
-                .filter(task -> task.getDescription().contains(description))
+                .filter(task -> task.getDescription().toLowerCase(Locale.ENGLISH).contains(searchTerm))
                 .toList();
         if (matchingTasks.isEmpty()) {
             throw new CaesarException("I couldn't find any tasks containing that description. "

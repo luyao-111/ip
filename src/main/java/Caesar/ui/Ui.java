@@ -155,8 +155,8 @@ public class Ui implements AutoCloseable {
     /** Formats matching tasks with one-based numbering. */
     protected String formatTaskFoundResponse(TaskList foundTasks) throws CaesarException {
         StringBuilder response = new StringBuilder("Here are the matching tasks in your list:\n");
-        for (int i = 0; i < foundTasks.size(); i++) {
-            response.append(i + 1).append(". ").append(foundTasks.get(i)).append("\n");
+        for (int taskNumber = 1; taskNumber <= foundTasks.size(); taskNumber++) {
+            response.append(taskNumber).append(". ").append(foundTasks.get(taskNumber)).append("\n");
         }
         return response.toString();
     }

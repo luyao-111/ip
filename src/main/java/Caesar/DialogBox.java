@@ -2,6 +2,7 @@ package caesar;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +21,8 @@ public class DialogBox extends HBox {
     private Label dialog;
     @FXML
     private ImageView displayPicture;
+    @FXML
+    private Label commandBadge;
 
     /** Creates a dialog box by loading the reusable FXML view. */
     private DialogBox(String text, Image image) {
@@ -46,7 +49,12 @@ public class DialogBox extends HBox {
 
     /** Creates a dialog box for a message sent by the user. */
     public static DialogBox getUserDialog(String text, Image image) {
-        return new DialogBox(text, image);
+        DialogBox dialogBox = new DialogBox(text, image);
+        String commandWord = text.trim().split("\\s+", 2)[0];
+        if (Caesar.CommandType.fromString(commandWord) != Caesar.CommandType.UNKNOWN) {
+            dialogBox.setCommandBadge(commandWord.toLowerCase(Locale.ENGLISH));
+        }
+        return dialogBox;
     }
 
     /** Creates a dialog box for a message sent by Caesar. */
@@ -54,5 +62,12 @@ public class DialogBox extends HBox {
         DialogBox dialogBox = new DialogBox(text, image);
         dialogBox.flip();
         return dialogBox;
+    }
+
+    /** Displays the recognized command keyword in this dialog. */
+    private void setCommandBadge(String commandWord) {
+        commandBadge.setText(commandWord);
+        commandBadge.setManaged(true);
+        commandBadge.setVisible(true);
     }
 }

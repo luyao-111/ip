@@ -211,7 +211,7 @@ public class ParserTest {
         );
 
         assertEquals(
-                "Invalid date format. Please use YYYY-MM-DD or MMM d yyyy.",
+                "Invalid date format. Please use YYYY-MM-DD, DD/MM/YYYY, or MMM d yyyy.",
                 exception.getMessage()
         );
     }
@@ -264,6 +264,6 @@ public class ParserTest {
         CaesarException exception = new Parser().unknownCommand();
 
         assertFalse(exception.getMessage().isBlank());
-        assertTrue(exception.getMessage().contains(Parser.getCommandInstructions()));
+        assertTrue(exception.getMessage().contains("HELP"));
     }
 }

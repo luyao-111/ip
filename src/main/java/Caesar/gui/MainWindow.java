@@ -1,5 +1,7 @@
 package caesar.gui;
 
+import java.util.Locale;
+
 import caesar.Caesar;
 import caesar.DialogBox;
 import caesar.exception.CaesarException;
@@ -30,6 +32,8 @@ public class MainWindow extends AnchorPane {
     private Button sendButton;
     @FXML
     private Button helpButton;
+    @FXML
+    private Label commandPreview;
 
     /** Processes commands using the existing Caesar application logic. */
     private Caesar caesar;
@@ -48,8 +52,13 @@ public class MainWindow extends AnchorPane {
         dialogContainer.heightProperty().addListener((observable, oldHeight, newHeight) -> {
             scrollToLatestDialog();
         });
+        userInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            userInput.getStyleClass().remove("error-input");
+            updateCommandPreview();
+        });
         userImage = new Image(getClass().getResourceAsStream("/images/User.png"));
         caesarImage = new Image(getClass().getResourceAsStream("/images/Caesar.png"));
+        updateCommandPreview();
     }
 
     /** Injects the Caesar instance and response collector used by this window. */
@@ -57,7 +66,7 @@ public class MainWindow extends AnchorPane {
         this.caesar = caesar;
         this.guiUi = guiUi;
         addDialog("Hello! I'm Caesar.\n"
-                + "You look even brighter than the last time we spoke.\n"
+                + "You look even brighter than the last time we spoke. "
                 + "How may I ease your day today?\n\n"
                 + Parser.getCommandInstructions(), false);
     }
@@ -71,21 +80,27 @@ public class MainWindow extends AnchorPane {
         }
 
         addDialog(command, true);
+        boolean shouldExit = false;
+        boolean hasError = false;
         try {
             guiUi.clearResponse();
-            boolean shouldExit = caesar.processCommand(command);
+            shouldExit = caesar.processCommand(command);
             String response = guiUi.consumeResponse();
             if (!response.isBlank()) {
                 addDialog(response, false);
             }
-            if (shouldExit) {
-                getScene().getWindow().hide();
-            }
         } catch (CaesarException exception) {
             guiUi.clearResponse();
-            addDialog(exception.getMessage(), false);
+            addDialog(exception.getMessage(), false, true);
+            hasError = true;
         }
         userInput.clear();
+        if (hasError) {
+            userInput.getStyleClass().add("error-input");
+        }
+        if (shouldExit) {
+            closeWindow();
+        }
     }
 
     /** Opens a small window containing the supported command formats. */
@@ -131,16 +146,55 @@ public class MainWindow extends AnchorPane {
         helpStage.show();
     }
 
-    /** Adds a user or Caesar message to the conversation. */
+    /** Adds a normal user or Caesar message to the conversation. */
     private void addDialog(String message, boolean fromUser) {
+        addDialog(message, fromUser, false);
+    }
+
+    /** Adds a user or Caesar message and optionally highlights it as an error. */
+    private void addDialog(String message, boolean fromUser, boolean isError) {
         DialogBox dialog = fromUser
                 ? DialogBox.getUserDialog(message, userImage)
                 : DialogBox.getCaesarDialog(message, caesarImage);
         dialog.getStyleClass().add(fromUser ? "user-dialog" : "caesar-dialog");
-        dialog.setMaxWidth(370.0);
+        if (isError) {
+            dialog.getStyleClass().add("error-dialog");
+        }
+        dialog.setMaxWidth(Double.MAX_VALUE);
         VBox.setMargin(dialog, new Insets(3.0, 2.0, 3.0, 2.0));
         dialogContainer.getChildren().add(dialog);
         scrollToLatestDialog();
+    }
+
+    /** Updates the live command indicator below the input field. */
+    private void updateCommandPreview() {
+        String input = userInput.getText().trim();
+        if (input.isEmpty()) {
+            commandPreview.setVisible(false);
+            commandPreview.setManaged(false);
+            return;
+        }
+
+        String commandWord = input.split("\\s+", 2)[0];
+        boolean isKnownCommand = Caesar.CommandType.fromString(commandWord)
+                != Caesar.CommandType.UNKNOWN;
+        commandPreview.setText(isKnownCommand
+                ? "Command: " + commandWord.toLowerCase(Locale.ENGLISH)
+                : "Unknown command");
+        commandPreview.getStyleClass().remove("command-preview-error");
+        if (!isKnownCommand) {
+            commandPreview.getStyleClass().add("command-preview-error");
+        }
+        commandPreview.setVisible(true);
+        commandPreview.setManaged(true);
+    }
+
+    /** Closes the main window and terminates the JavaFX application. */
+    private void closeWindow() {
+        if (getScene() != null && getScene().getWindow() instanceof Stage stage) {
+            stage.close();
+        }
+        Platform.exit();
     }
 
     /** Scrolls the conversation to its newest message after JavaFX lays it out. */

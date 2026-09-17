@@ -64,11 +64,35 @@
     -fx-border-color: #e9c2a0;
 }
 
+.error-dialog {
+    -fx-background-color: #ffe0e0;
+    -fx-border-color: #df7777;
+    -fx-border-width: 2px;
+}
+
 .user-dialog .label,
 .caesar-dialog .label {
     -fx-text-fill: #5d4235;
     -fx-font-size: 14px;
     -fx-line-spacing: 3px;
+}
+
+.command-badge,
+.command-preview {
+    -fx-background-color: #fffaf3;
+    -fx-background-radius: 12px;
+    -fx-border-color: #d8aa86;
+    -fx-border-radius: 12px;
+    -fx-padding: 3px 9px 3px 9px;
+    -fx-text-fill: #8d5e43;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.error-dialog .label,
+.command-preview-error {
+    -fx-text-fill: #a52d2d;
+    -fx-font-weight: bold;
 }
 
 .user-dialog .image-view,
@@ -106,6 +130,12 @@
 
 .send-button:pressed {
     -fx-background-color: #a9684d;
+}
+
+.command-input.error-input {
+    -fx-border-color: #df7777;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(223, 119, 119, 0.35), 6, 0.2, 0, 0);
 }
 
 .help-button {

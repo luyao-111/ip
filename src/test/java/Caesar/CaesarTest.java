@@ -52,7 +52,7 @@ public class CaesarTest {
         caesar.processCommand("todo Buy groceries");
         guiUi.clearResponse();
 
-        caesar.processCommand("find book");
+        caesar.processCommand("find BOOK");
 
         assertTrue(guiUi.consumeResponse().contains("1. [T][ ] Read a book"));
     }
@@ -98,7 +98,7 @@ public class CaesarTest {
         caesar.processCommand("reschedule 1 05/05/2026 06/05/2026");
 
         assertTrue(guiUi.consumeResponse().contains("May 5 2026"));
-        assertEquals("E | 0 | Project meeting | May 5 2026 | Jun 5 2026",
+        assertEquals("E | 0 | Project meeting | May 5 2026 | May 6 2026",
                 java.nio.file.Files.readString(temporaryDirectory.resolve("tasks.txt")).trim());
     }
 

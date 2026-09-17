@@ -122,7 +122,7 @@ public class TaskListTest {
         ToDo secondMatchingTask = new ToDo("book a holiday");
         tasks.add(secondMatchingTask);
 
-        TaskList foundTasks = tasks.find("book");
+        TaskList foundTasks = tasks.find("BOOK");
 
         assertEquals(2, foundTasks.size());
         assertSame(matchingTask, foundTasks.get(1));

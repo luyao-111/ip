@@ -19,6 +19,20 @@ From the project directory, run:
 .\gradlew.bat run
 ```
 
+### Run the packaged JAR
+
+If you downloaded `Caesar.jar` from a release, you can run Caesar without
+opening the project in an IDE or installing Gradle. Make sure Java 25 is
+installed, open a terminal in the folder containing the JAR, and run:
+
+```text
+java -jar Caesar.jar
+```
+
+Caesar stores tasks in `data/tasks.txt` relative to the folder where it is
+started. Run the JAR from a folder where you have permission to create and
+update this `data` folder.
+
 When the GUI opens, Caesar first displays a greeting. It then shows a reminder dialog when there are dated tasks that are overdue or due within the next three days. The reminder dialog contains two sections:
 
 1. **Missed tasks**: pending deadlines or events whose relevant date has passed.

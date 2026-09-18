@@ -2,6 +2,8 @@
 
 Caesar is a personal task assistant for recording tasks, tracking deadlines, and managing events. You can use Caesar through the graphical user interface (GUI) or by entering commands.
 
+![Caesar GUI showing the task list and command input](Ui.png)
+
 ## Getting started
 
 ### Prerequisites

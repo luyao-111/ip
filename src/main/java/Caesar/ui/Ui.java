@@ -171,12 +171,15 @@ public class Ui implements AutoCloseable {
     /** Formats the two-part reminder report shared by console and GUI interfaces. */
     protected String formatReminderResponse(TaskList tasks) {
         TaskList.ReminderTasks reminderTasks = tasks.getReminderTasks(LocalDate.now());
-        return "Here are your reminders:\n\n"
-                + "Missed tasks:\n"
+        return "I'm right here. Take a breath and drink some water first—I "
+                + "sorted through your schedule so you don't have to stress.\n\n"
+                + "A few loose ends from earlier:\n"
                 + formatReminderTasks(reminderTasks.getMissedTasks())
                 + "\n\n"
-                + "Tasks that can still be completed within the next 3 days:\n"
-                + formatReminderTasks(reminderTasks.getUpcomingTasks());
+                + "On the horizon (next 3 days):\n"
+                + formatReminderTasks(reminderTasks.getUpcomingTasks())
+                + "\n"
+                + formatDynamicComment(tasks);
     }
 
     /** Formats one reminder section and keeps empty sections explicit. */
@@ -233,22 +236,19 @@ public class Ui implements AutoCloseable {
         return response.toString();
     }
 
-    /** Formats encouragement tailored to the current number of tasks. */
+    /** Formats encouragement based on pending dated tasks due within three days. */
     protected String formatDynamicComment(TaskList tasks) {
-        if (tasks.size() < 3) {
-            return "Now you have " + tasks.size() + " tasks in the list.\n"
-                    + "Here is what we have lined up: \n" + tasks
-                    + " \nA light and manageable day ahead\u2014you've got this effortlessly.";
-        } else if (tasks.size() < 7) {
-            return "\nNow you have " + tasks.size() + " tasks in the list.\n"
-                    + "Here is your schedule for today: \n" + tasks
-                    + "\nSteady pace, one thing at a time\u2014I'm right beside you:";
-        } else {
-            return "\nNow you have " + tasks.size() + " tasks in the list.\n"
-                    + "You have a full plate today: \n" + tasks
-                    + "\nRemember to take breaks and stay hydrated\u2014"
-                    + "let's tackle them together step by step!";
+        int upcomingTaskCount = tasks.getReminderTasks(LocalDate.now()).getUpcomingTasks().size();
+        if (upcomingTaskCount == 0) {
+            return "You have no deadlines or events due within the next 3 days, "
+                    + "so you have some breathing room.";
         }
+        if (upcomingTaskCount == 1) {
+            return "You have 1 task due within the next 3 days. "
+                    + "Take it one step at a time\u2014you've got this.";
+        }
+        return "You have " + upcomingTaskCount + " tasks due within the next 3 days. "
+                + "Plan ahead and remember to take breaks\u2014you've got this.";
     }
 
     /** Closes the standard-input scanner. */

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,10 +73,11 @@ public class CaesarTest {
         caesar.processCommand("reminder");
 
         String response = guiUi.consumeResponse();
-        assertTrue(response.contains("Missed tasks:"));
-        assertTrue(response.contains("Tasks that can still be completed within the next 3 days:"));
+        assertTrue(response.contains("A few loose ends from earlier:"));
+        assertTrue(response.contains("On the horizon (next 3 days):"));
         assertTrue(response.contains("Missed report"));
         assertTrue(response.contains("Upcoming meeting"));
+        assertTrue(response.contains("You have 1 task due within the next 3 days."));
     }
 
     /** Verifies that typing help produces the command list in the GUI response. */

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
@@ -55,6 +56,27 @@ public class CaesarTest {
         caesar.processCommand("find BOOK");
 
         assertTrue(guiUi.consumeResponse().contains("1. [T][ ] Read a book"));
+    }
+
+    /** Verifies that the reminder command returns separate missed and upcoming sections. */
+    @Test
+    public void processCommandShowsReminders() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+        LocalDate today = LocalDate.now();
+
+        caesar.processCommand("deadline Missed report /by " + today.minusDays(1));
+        caesar.processCommand("event Upcoming meeting /from " + today.plusDays(1)
+                + " /to " + today.plusDays(2));
+        guiUi.clearResponse();
+
+        caesar.processCommand("reminder");
+
+        String response = guiUi.consumeResponse();
+        assertTrue(response.contains("Missed tasks:"));
+        assertTrue(response.contains("Tasks that can still be completed within the next 3 days:"));
+        assertTrue(response.contains("Missed report"));
+        assertTrue(response.contains("Upcoming meeting"));
     }
 
     /** Verifies that typing help produces the command list in the GUI response. */

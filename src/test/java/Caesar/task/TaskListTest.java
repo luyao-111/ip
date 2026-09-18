@@ -3,6 +3,7 @@ package caesar.task;
 import caesar.exception.CaesarException;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,6 +111,33 @@ public class TaskListTest {
         assertSame(completed, sortedTasks.get(1));
         assertSame(completed, tasks.get(1));
         assertSame(pending, tasks.get(2));
+    }
+
+    @Test
+    public void testReminderTasksSeparateMissedAndUpcomingPendingDatedTasks() throws CaesarException {
+        LocalDate today = LocalDate.of(2026, 1, 10);
+        Deadline missed = new Deadline("Submit report", "Jan 9 2026");
+        Event upcomingEvent = new Event("Project meeting", "Jan 12 2026", "Jan 13 2026");
+        Deadline dueToday = new Deadline("Pay bill", "Jan 10 2026");
+        Deadline outsideWindow = new Deadline("Plan holiday", "Jan 14 2026");
+        Deadline completedMissed = new Deadline("Old completed task", "Jan 8 2026");
+        completedMissed.markAsDone();
+
+        TaskList tasks = new TaskList();
+        tasks.add(missed);
+        tasks.add(upcomingEvent);
+        tasks.add(dueToday);
+        tasks.add(outsideWindow);
+        tasks.add(completedMissed);
+        tasks.add(new ToDo("Read a book"));
+
+        TaskList.ReminderTasks reminders = tasks.getReminderTasks(today);
+
+        assertEquals(1, reminders.getMissedTasks().size());
+        assertSame(missed, reminders.getMissedTasks().get(0));
+        assertEquals(2, reminders.getUpcomingTasks().size());
+        assertSame(upcomingEvent, reminders.getUpcomingTasks().get(0));
+        assertSame(dueToday, reminders.getUpcomingTasks().get(1));
     }
 
     /** Verifies that finding tasks preserves matching tasks and their order. */

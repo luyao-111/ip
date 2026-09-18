@@ -69,6 +69,22 @@ public class MainWindow extends AnchorPane {
                 + "You look even brighter than the last time we spoke. "
                 + "How may I ease your day today?\n\n"
                 + Parser.getCommandInstructions(), false);
+        showRemindersOnStartup();
+    }
+
+    /** Displays the same reminder report available through the reminder command. */
+    private void showRemindersOnStartup() {
+        try {
+            guiUi.clearResponse();
+            caesar.processCommand("reminder");
+            String response = guiUi.consumeResponse();
+            if (!response.isBlank()) {
+                addDialog(response, false);
+            }
+        } catch (CaesarException exception) {
+            guiUi.clearResponse();
+            addDialog(exception.getMessage(), false, true);
+        }
     }
 
     /** Processes the command entered by the user and displays Caesar's response. */

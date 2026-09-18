@@ -9,6 +9,7 @@ import caesar.command.FindCommand;
 import caesar.command.HelpCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
+import caesar.command.ReminderCommand;
 import caesar.command.RescheduleCommand;
 import caesar.command.UnmarkCommand;
 import caesar.exception.CaesarException;
@@ -53,6 +54,7 @@ public class Parser {
                 "list sorted",
                 "find <keyword>",
                 "help",
+                "reminder",
                 "mark <task number>",
                 "unmark <task number>",
                 "delete <task number>",
@@ -85,6 +87,12 @@ public class Parser {
             case LIST -> new ListCommand("sorted".equals(details));
             case FIND -> new FindCommand(requireDetails(details, "find <keyword>"));
             case HELP -> new HelpCommand();
+            case REMINDER -> {
+                if (details != null) {
+                    throw unknownCommand();
+                }
+                yield new ReminderCommand();
+            }
             case MARK -> new MarkCommand(parseTaskNumber(details, "mark <task number>"));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(details, "unmark <task number>"));
             case DELETE -> new DeleteCommand(parseTaskNumber(details, "delete <task number>"));

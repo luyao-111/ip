@@ -7,6 +7,7 @@ import caesar.task.Task;
 import caesar.task.TaskList;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.StreamSupport;
@@ -159,6 +160,36 @@ public class Ui implements AutoCloseable {
             response.append(taskNumber).append(". ").append(foundTasks.get(taskNumber)).append("\n");
         }
         return response.toString();
+    }
+
+    /** Prints overdue and soon-due pending dated tasks. */
+    public void showReminders(TaskList tasks) {
+        System.out.println(formatReminderResponse(tasks));
+        showDivider();
+    }
+
+    /** Formats the two-part reminder report shared by console and GUI interfaces. */
+    protected String formatReminderResponse(TaskList tasks) {
+        TaskList.ReminderTasks reminderTasks = tasks.getReminderTasks(LocalDate.now());
+        return "Here are your reminders:\n\n"
+                + "Missed tasks:\n"
+                + formatReminderTasks(reminderTasks.getMissedTasks())
+                + "\n\n"
+                + "Tasks that can still be completed within the next 3 days:\n"
+                + formatReminderTasks(reminderTasks.getUpcomingTasks());
+    }
+
+    /** Formats one reminder section and keeps empty sections explicit. */
+    private String formatReminderTasks(List<Task> reminderTasks) {
+        if (reminderTasks.isEmpty()) {
+            return "None";
+        }
+
+        StringBuilder response = new StringBuilder();
+        for (Task task : reminderTasks) {
+            response.append("- ").append(task).append("\n");
+        }
+        return response.toString().stripTrailing();
     }
 
     /** Prints the available command formats. */

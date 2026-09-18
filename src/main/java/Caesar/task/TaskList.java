@@ -2,6 +2,9 @@ package caesar.task;
 
 import caesar.exception.CaesarException;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -18,6 +21,8 @@ import java.util.Locale;
  */
 public class TaskList implements Iterable<Task> {
     private static final int MAX_TASKS = 100;
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
     private static final String INVALID_TASK_NUMBER =
             "I couldn't locate that specific item number on our list. "
                     + "Take a quick look at /list/ to check the numbering.";
@@ -118,7 +123,69 @@ public class TaskList implements Iterable<Task> {
         return sortedTasks;
     }
 
-    // Can add filtering methods here, e.g. by date, by type, etc.
+    /** Returns pending dated tasks split into overdue and upcoming reminders. */
+    public ReminderTasks getReminderTasks(LocalDate today) {
+        LocalDate lastUpcomingDate = today.plusDays(3);
+        ArrayList<Task> missedTasks = new ArrayList<>();
+        ArrayList<Task> upcomingTasks = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.isDone()) {
+                continue;
+            }
+
+            LocalDate relevantDate = getRelevantDate(task);
+            if (relevantDate == null) {
+                continue;
+            }
+
+            if (relevantDate.isBefore(today)) {
+                missedTasks.add(task);
+            } else if (!relevantDate.isAfter(lastUpcomingDate)) {
+                upcomingTasks.add(task);
+            }
+        }
+        return new ReminderTasks(missedTasks, upcomingTasks);
+    }
+
+    /** Returns the date used to classify a deadline or event reminder. */
+    private LocalDate getRelevantDate(Task task) {
+        String dateText;
+        if (task instanceof Deadline deadline) {
+            dateText = deadline.getBy();
+        } else if (task instanceof Event event) {
+            dateText = event.getEnd();
+        } else {
+            return null;
+        }
+
+        try {
+            return LocalDate.parse(dateText, DISPLAY_DATE_FORMAT);
+        } catch (DateTimeParseException exception) {
+            return null;
+        }
+    }
+
+    /** Stores the two groups shown by the reminder report. */
+    public static final class ReminderTasks {
+        private final List<Task> missedTasks;
+        private final List<Task> upcomingTasks;
+
+        private ReminderTasks(List<Task> missedTasks, List<Task> upcomingTasks) {
+            this.missedTasks = List.copyOf(missedTasks);
+            this.upcomingTasks = List.copyOf(upcomingTasks);
+        }
+
+        /** Returns pending dated tasks whose relevant date has passed. */
+        public List<Task> getMissedTasks() {
+            return missedTasks;
+        }
+
+        /** Returns pending dated tasks due today or within the next three days. */
+        public List<Task> getUpcomingTasks() {
+            return upcomingTasks;
+        }
+    }
 
     /** Returns the number of tasks in the list. */
     public int size() {

@@ -8,6 +8,7 @@ import caesar.command.FindCommand;
 import caesar.command.HelpCommand;
 import caesar.command.ListCommand;
 import caesar.command.MarkCommand;
+import caesar.command.ReminderCommand;
 import caesar.command.RescheduleCommand;
 import caesar.command.UnmarkCommand;
 import caesar.exception.CaesarException;
@@ -30,6 +31,7 @@ public class ParserTest {
                 Parser.getCommandInstructions());
         assertTrue(Parser.getHelpCommands().contains("find <keyword>"));
         assertTrue(Parser.getHelpCommands().contains("help"));
+        assertTrue(Parser.getHelpCommands().contains("reminder"));
     }
 
     @Test
@@ -82,6 +84,11 @@ public class ParserTest {
     @Test
     public void testParseCommandCreatesHelpCommand() throws CaesarException {
         assertInstanceOf(HelpCommand.class, new Parser().parseCommand("HELP"));
+    }
+
+    @Test
+    public void testParseCommandCreatesReminderCommand() throws CaesarException {
+        assertInstanceOf(ReminderCommand.class, new Parser().parseCommand("reminder"));
     }
 
     @Test

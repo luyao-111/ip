@@ -62,6 +62,12 @@ public class GuiUi extends Ui {
         response.append(formatTaskFoundResponse(foundTasks));
     }
 
+    /** Records overdue and soon-due pending dated tasks for the GUI. */
+    @Override
+    public void showReminders(TaskList tasks) {
+        response.append(formatReminderResponse(tasks));
+    }
+
     /** Records the available command formats for the JavaFX conversation window. */
     @Override
     public void showHelp() {

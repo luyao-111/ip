@@ -92,6 +92,7 @@ public class Ui implements AutoCloseable {
     /** Prints feedback after adding a task and the dynamic task-count comment. */
     public void showTaskAdded(Task task, TaskList tasks) {
         System.out.println(formatTaskAddedResponse(task, tasks));
+        System.out.println(formatDynamicComment(tasks));
         showDivider();
     }
 
@@ -121,8 +122,7 @@ public class Ui implements AutoCloseable {
 
     /** Formats the response shown after adding a task. */
     protected String formatTaskAddedResponse(Task task, TaskList tasks) {
-        return "Got it. I've safely recorded this for you:\n" + task
-                + "\n" + formatDynamicComment(tasks);
+        return "Got it. I've safely recorded this for you:\n" + task;
     }
 
     /** Formats the response shown after deleting a task. */
@@ -165,6 +165,7 @@ public class Ui implements AutoCloseable {
     /** Prints overdue and soon-due pending dated tasks. */
     public void showReminders(TaskList tasks) {
         System.out.println(formatReminderResponse(tasks));
+        System.out.println(formatDynamicComment(tasks));
         showDivider();
     }
 
@@ -177,9 +178,7 @@ public class Ui implements AutoCloseable {
                 + formatReminderTasks(reminderTasks.getMissedTasks())
                 + "\n\n"
                 + "On the horizon (next 3 days):\n"
-                + formatReminderTasks(reminderTasks.getUpcomingTasks())
-                + "\n"
-                + formatDynamicComment(tasks);
+                + formatReminderTasks(reminderTasks.getUpcomingTasks());
     }
 
     /** Prints the result of clearing pending missed tasks. */
@@ -255,15 +254,25 @@ public class Ui implements AutoCloseable {
     protected String formatDynamicComment(TaskList tasks) {
         int upcomingTaskCount = tasks.getReminderTasks(LocalDate.now()).getUpcomingTasks().size();
         if (upcomingTaskCount == 0) {
-            return "You have no deadlines or events due within the next 3 days, "
-                    + "so you have some breathing room.";
+            return "You have no deadlines or events due within the next 3 days. Take some time to relax and recharge.";
         }
-        if (upcomingTaskCount == 1) {
-            return "You have 1 task due within the next 3 days. "
+        String taskLabel = upcomingTaskCount == 1 ? "task" : "tasks";
+        if (1 <= upcomingTaskCount && upcomingTaskCount < 4) {
+            return "You have " + upcomingTaskCount + " " + taskLabel
+                    + " due within the next 3 days. "
                     + "Take it one step at a time\u2014you've got this.";
         }
-        return "You have " + upcomingTaskCount + " tasks due within the next 3 days. "
-                + "Plan ahead and remember to take breaks\u2014you've got this.";
+        if (4 <= upcomingTaskCount && upcomingTaskCount < 8) {
+            return "You have " + upcomingTaskCount + " " + taskLabel
+                    + " due within the next 3 days. "
+                    + "Things are getting a bit crowded over the next few days."
+                    + " Let's pace ourselves, eat properly, and tackle them one by one.";
+        }
+        return "You have " + upcomingTaskCount + " " + taskLabel
+                + " due within the next 3 days. "
+                + "Hey, that's way too much to juggle in three days!"
+                + " Please don't push yourself to exhaustion—"
+                + "let's prioritize, take breaks, and remember your health comes first.";
     }
 
     /** Closes the standard-input scanner. */

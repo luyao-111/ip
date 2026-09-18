@@ -142,6 +142,18 @@ public class TaskListTest {
     }
 
     @Test
+    public void testReminderIncludesPendingSeptemberDeadlineAsMissed() throws CaesarException {
+        TaskList tasks = new TaskList();
+        Deadline deadline = new Deadline("cs", "Sep 1 2026");
+        tasks.add(deadline);
+
+        TaskList.ReminderTasks reminders = tasks.getReminderTasks(LocalDate.of(2026, 9, 18));
+
+        assertEquals(1, reminders.getMissedTasks().size());
+        assertSame(deadline, reminders.getMissedTasks().get(0));
+    }
+
+    @Test
     public void testClearMissedTasksRemovesOnlyPendingOverdueDatedTasks() throws CaesarException {
         LocalDate today = LocalDate.of(2026, 1, 10);
         Deadline missed = new Deadline("Submit report", "Jan 9 2026");

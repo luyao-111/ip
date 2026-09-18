@@ -3,6 +3,7 @@ package caesar;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,11 +15,15 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 /** Represents one conversation message and its speaker avatar. */
 public class DialogBox extends HBox {
+    private static final Pattern TASK_LINE_PATTERN = Pattern.compile("\\s*(?:- |\\d+\\. ).+");
+
     @FXML
-    private Label dialog;
+    private TextFlow dialog;
     @FXML
     private ImageView displayPicture;
     @FXML
@@ -35,8 +40,26 @@ public class DialogBox extends HBox {
             throw new IllegalStateException("Unable to load DialogBox.fxml", exception);
         }
 
-        dialog.setText(text);
+        setDialogText(text);
         displayPicture.setImage(image);
+    }
+
+    /** Sets the dialog text and emphasizes lines that represent tasks. */
+    private void setDialogText(String text) {
+        String[] lines = text.split("\\n", -1);
+        for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            Text line = new Text(lines[lineIndex]);
+            line.getStyleClass().add("dialog-text");
+            if (TASK_LINE_PATTERN.matcher(lines[lineIndex]).matches()) {
+                line.getStyleClass().add("task-line");
+            }
+            dialog.getChildren().add(line);
+            if (lineIndex < lines.length - 1) {
+                Text lineBreak = new Text("\n");
+                lineBreak.getStyleClass().add("dialog-text");
+                dialog.getChildren().add(lineBreak);
+            }
+        }
     }
 
     /** Flips this dialog so Caesar's avatar is displayed on the left. */

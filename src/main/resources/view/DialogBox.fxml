@@ -5,6 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
 
 <fx:root alignment="TOP_RIGHT"
          maxHeight="1.7976931348623157E308"
@@ -19,10 +20,9 @@
               spacing="4.0"
               HBox.hgrow="ALWAYS">
             <children>
-                <Label fx:id="dialog"
-                       maxWidth="1.7976931348623157E308"
-                       text="Label"
-                       wrapText="true" />
+                <TextFlow fx:id="dialog"
+                          lineSpacing="3.0"
+                          maxWidth="1.7976931348623157E308" />
                 <Label fx:id="commandBadge"
                        managed="false"
                        visible="false"

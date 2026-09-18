@@ -8,6 +8,7 @@ import caesar.ui.Ui;
 /** Collects command responses for display in the JavaFX conversation window. */
 public class GuiUi extends Ui {
     private final StringBuilder response = new StringBuilder();
+    private String followUpResponse = "";
 
     /** Creates a user interface that stores responses instead of printing them. */
     public GuiUi() {
@@ -17,12 +18,20 @@ public class GuiUi extends Ui {
     /** Clears the response collected from the previous command. */
     public void clearResponse() {
         response.setLength(0);
+        followUpResponse = "";
     }
 
     /** Returns the latest command response and clears it for the next command. */
     public String consumeResponse() {
         String message = response.toString();
-        clearResponse();
+        response.setLength(0);
+        return message;
+    }
+
+    /** Returns the follow-up response collected for a separate GUI dialog. */
+    public String consumeFollowUpResponse() {
+        String message = followUpResponse;
+        followUpResponse = "";
         return message;
     }
 
@@ -30,6 +39,7 @@ public class GuiUi extends Ui {
     @Override
     public void showTaskAdded(Task task, TaskList tasks) {
         response.append(formatTaskAddedResponse(task, tasks));
+        followUpResponse = formatDynamicComment(tasks);
     }
 
     /** Records feedback after deleting a task. */
@@ -66,6 +76,7 @@ public class GuiUi extends Ui {
     @Override
     public void showReminders(TaskList tasks) {
         response.append(formatReminderResponse(tasks));
+        followUpResponse = formatDynamicComment(tasks);
     }
 
     /** Records the result of clearing pending missed tasks for the GUI. */

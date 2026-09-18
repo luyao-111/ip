@@ -31,6 +31,21 @@ public class CaesarTest {
         assertTrue(guiUi.consumeResponse().contains("Read a book"));
     }
 
+    /** Verifies that a task-added response stores the dynamic comment separately. */
+    @Test
+    public void processCommandStoresDynamicCommentAsFollowUpResponse() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+        LocalDate today = LocalDate.now();
+
+        caesar.processCommand("deadline Submit report /by " + today.plusDays(1));
+
+        assertFalse(guiUi.consumeResponse().contains("You have 1 task due within the next 3 days."));
+        assertEquals("You have 1 task due within the next 3 days. "
+                + "Take it one step at a time—you've got this.",
+                guiUi.consumeFollowUpResponse());
+    }
+
     /** Verifies that the list command returns the persisted task to the GUI user interface. */
     @Test
     public void processCommandListsTasks() throws Exception {
@@ -77,7 +92,8 @@ public class CaesarTest {
         assertTrue(response.contains("On the horizon (next 3 days):"));
         assertTrue(response.contains("Missed report"));
         assertTrue(response.contains("Upcoming meeting"));
-        assertTrue(response.contains("You have 1 task due within the next 3 days."));
+        assertTrue(guiUi.consumeFollowUpResponse().contains(
+                "You have 1 task due within the next 3 days."));
     }
 
     /** Verifies that the clear command removes missed tasks and persists the remaining tasks. */

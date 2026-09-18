@@ -77,6 +77,15 @@
     -fx-line-spacing: 3px;
 }
 
+.dialog-text {
+    -fx-fill: #5d4235;
+    -fx-font-size: 14px;
+}
+
+.task-line {
+    -fx-font-weight: bold;
+}
+
 .command-badge,
 .command-preview {
     -fx-background-color: #fffaf3;

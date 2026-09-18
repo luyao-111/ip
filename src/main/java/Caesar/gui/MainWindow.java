@@ -77,10 +77,7 @@ public class MainWindow extends AnchorPane {
         try {
             guiUi.clearResponse();
             caesar.processCommand("reminder");
-            String response = guiUi.consumeResponse();
-            if (!response.isBlank()) {
-                addDialog(response, false);
-            }
+            addCommandResponses();
         } catch (CaesarException exception) {
             guiUi.clearResponse();
             addDialog(exception.getMessage(), false, true);
@@ -101,10 +98,7 @@ public class MainWindow extends AnchorPane {
         try {
             guiUi.clearResponse();
             shouldExit = caesar.processCommand(command);
-            String response = guiUi.consumeResponse();
-            if (!response.isBlank()) {
-                addDialog(response, false);
-            }
+            addCommandResponses();
         } catch (CaesarException exception) {
             guiUi.clearResponse();
             addDialog(exception.getMessage(), false, true);
@@ -116,6 +110,19 @@ public class MainWindow extends AnchorPane {
         }
         if (shouldExit) {
             closeWindow();
+        }
+    }
+
+    /** Adds the primary command response and its optional follow-up dialog. */
+    private void addCommandResponses() {
+        String response = guiUi.consumeResponse();
+        if (!response.isBlank()) {
+            addDialog(response, false);
+        }
+
+        String followUpResponse = guiUi.consumeFollowUpResponse();
+        if (!followUpResponse.isBlank()) {
+            addDialog(followUpResponse, false);
         }
     }
 

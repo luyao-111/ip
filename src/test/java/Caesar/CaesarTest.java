@@ -80,6 +80,25 @@ public class CaesarTest {
         assertTrue(response.contains("You have 1 task due within the next 3 days."));
     }
 
+    /** Verifies that the clear command removes missed tasks and persists the remaining tasks. */
+    @Test
+    public void processCommandClearsMissedTasks() throws Exception {
+        GuiUi guiUi = new GuiUi();
+        Caesar caesar = createCaesar(guiUi);
+        LocalDate today = LocalDate.now();
+
+        caesar.processCommand("deadline Missed report /by " + today.minusDays(1));
+        caesar.processCommand("deadline Upcoming report /by " + today.plusDays(1));
+        guiUi.clearResponse();
+
+        caesar.processCommand("clear missed");
+
+        assertEquals("Cleared 1 missed task.", guiUi.consumeResponse());
+        String savedTasks = java.nio.file.Files.readString(temporaryDirectory.resolve("tasks.txt"));
+        assertTrue(savedTasks.contains("Upcoming report"));
+        assertFalse(savedTasks.contains("Missed report"));
+    }
+
     /** Verifies that typing help produces the command list in the GUI response. */
     @Test
     public void processCommandShowsHelp() throws Exception {

@@ -2,6 +2,7 @@ package caesar.parser;
 
 import caesar.Caesar;
 import caesar.command.AddCommand;
+import caesar.command.ClearMissedCommand;
 import caesar.command.Command;
 import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
@@ -55,6 +56,7 @@ public class Parser {
                 "find <keyword>",
                 "help",
                 "reminder",
+                "clear missed",
                 "mark <task number>",
                 "unmark <task number>",
                 "delete <task number>",
@@ -92,6 +94,12 @@ public class Parser {
                     throw unknownCommand();
                 }
                 yield new ReminderCommand();
+            }
+            case CLEAR -> {
+                if (details != null && !"missed".equalsIgnoreCase(details.trim())) {
+                    throw unknownCommand();
+                }
+                yield new ClearMissedCommand();
             }
             case MARK -> new MarkCommand(parseTaskNumber(details, "mark <task number>"));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(details, "unmark <task number>"));

@@ -36,6 +36,7 @@ public class Caesar {
         FIND,
         HELP,
         REMINDER,
+        CLEAR,
         MARK,
         UNMARK,
         DELETE,

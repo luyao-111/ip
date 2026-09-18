@@ -148,6 +148,27 @@ public class TaskList implements Iterable<Task> {
         return new ReminderTasks(missedTasks, upcomingTasks);
     }
 
+    /** Removes pending dated tasks whose relevant date is before today. */
+    public List<RemovedTask> clearMissedTasks(LocalDate today) {
+        ArrayList<RemovedTask> removedTasks = new ArrayList<>();
+        for (int taskIndex = tasks.size() - 1; taskIndex >= 0; taskIndex--) {
+            Task task = tasks.get(taskIndex);
+            LocalDate relevantDate = getRelevantDate(task);
+            if (!task.isDone() && relevantDate != null && relevantDate.isBefore(today)) {
+                removedTasks.add(new RemovedTask(taskIndex, tasks.remove(taskIndex)));
+            }
+        }
+        removedTasks.sort(Comparator.comparingInt(RemovedTask::getPosition));
+        return List.copyOf(removedTasks);
+    }
+
+    /** Restores tasks removed by {@link #clearMissedTasks(LocalDate)}. */
+    public void restoreRemovedTasks(List<RemovedTask> removedTasks) {
+        for (RemovedTask removedTask : removedTasks) {
+            tasks.add(removedTask.getPosition(), removedTask.getTask());
+        }
+    }
+
     /** Returns the date used to classify a deadline or event reminder. */
     private LocalDate getRelevantDate(Task task) {
         String dateText;
@@ -184,6 +205,27 @@ public class TaskList implements Iterable<Task> {
         /** Returns pending dated tasks due today or within the next three days. */
         public List<Task> getUpcomingTasks() {
             return upcomingTasks;
+        }
+    }
+
+    /** Stores a removed task and its original zero-based list position. */
+    public static final class RemovedTask {
+        private final int position;
+        private final Task task;
+
+        private RemovedTask(int position, Task task) {
+            this.position = position;
+            this.task = task;
+        }
+
+        /** Returns the original position of the removed task. */
+        int getPosition() {
+            return position;
+        }
+
+        /** Returns the removed task. */
+        Task getTask() {
+            return task;
         }
     }
 

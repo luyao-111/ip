@@ -68,6 +68,12 @@ public class GuiUi extends Ui {
         response.append(formatReminderResponse(tasks));
     }
 
+    /** Records the result of clearing pending missed tasks for the GUI. */
+    @Override
+    public void showMissedTasksCleared(int clearedTaskCount) {
+        response.append(formatMissedTasksClearedResponse(clearedTaskCount));
+    }
+
     /** Records the available command formats for the JavaFX conversation window. */
     @Override
     public void showHelp() {

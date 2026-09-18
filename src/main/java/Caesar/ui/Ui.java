@@ -182,6 +182,21 @@ public class Ui implements AutoCloseable {
                 + formatDynamicComment(tasks);
     }
 
+    /** Prints the result of clearing pending missed tasks. */
+    public void showMissedTasksCleared(int clearedTaskCount) {
+        System.out.println(formatMissedTasksClearedResponse(clearedTaskCount));
+        showDivider();
+    }
+
+    /** Formats the result of clearing pending missed tasks. */
+    protected String formatMissedTasksClearedResponse(int clearedTaskCount) {
+        if (clearedTaskCount == 0) {
+            return "There are no missed tasks to clear.";
+        }
+        String taskLabel = clearedTaskCount == 1 ? "task" : "tasks";
+        return "Cleared " + clearedTaskCount + " missed " + taskLabel + ".";
+    }
+
     /** Formats one reminder section and keeps empty sections explicit. */
     private String formatReminderTasks(List<Task> reminderTasks) {
         if (reminderTasks.isEmpty()) {

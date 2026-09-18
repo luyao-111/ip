@@ -2,6 +2,7 @@ package caesar.parser;
 
 import caesar.Caesar;
 import caesar.command.AddCommand;
+import caesar.command.ClearMissedCommand;
 import caesar.command.DeleteCommand;
 import caesar.command.ExitCommand;
 import caesar.command.FindCommand;
@@ -89,6 +90,12 @@ public class ParserTest {
     @Test
     public void testParseCommandCreatesReminderCommand() throws CaesarException {
         assertInstanceOf(ReminderCommand.class, new Parser().parseCommand("reminder"));
+    }
+
+    @Test
+    public void testParseCommandCreatesClearMissedCommand() throws CaesarException {
+        assertInstanceOf(ClearMissedCommand.class, new Parser().parseCommand("clear missed"));
+        assertInstanceOf(ClearMissedCommand.class, new Parser().parseCommand("clear"));
     }
 
     @Test
